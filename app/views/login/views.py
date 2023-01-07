@@ -1,18 +1,20 @@
 '''
 Author: TheDraco
 Date: 2022-12-07 15:57:41
-LastEditTime: 2023-01-07 21:46:33
+LastEditTime: 2023-01-07 22:08:32
 Description:
 FilePath: /10_flask/app/views/user/views.py
 '''
 from . import *
 from flask import render_template, request, make_response, redirect, url_for, session
-from app import db#, redis_store
+from app import db, redis_store
 from app.models.models import User
 from sqlalchemy.sql import and_
 
 @login_blue.route("/")
 def test():
+    redis_store.set("name","test")
+    print(redis_store.get("name"))
     return "test"
 
 @login_blue.route("/login")
