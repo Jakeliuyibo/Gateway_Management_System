@@ -6,7 +6,7 @@ Description:
 FilePath: /10_flask/app/views/user/views.py
 '''
 from flask import render_template, Blueprint, request, make_response, redirect, url_for, session
-from app import db
+from app import db, redis_store
 from app.models.models import User
 from sqlalchemy.sql import and_
 
@@ -22,6 +22,20 @@ HTML_PATH       = ""
 user_blue = Blueprint("user", __name__, template_folder=TEMPLATEs_PATH + HTML_PATH)
 
 @user_blue.route("/")
+def test():
+
+    #测试redis
+    redis_store.set("name", "test")
+    print("REDIS", redis_store.get("name"))
+
+    #测试session
+    session["name"] = "123"
+    print("SESSION", session.get("name"))
+
+    return "test"
+
+
+
 @user_blue.route("/login")
 def login():
     """ 登陆操作：从URL中获得login.html输入的用户名和密码，校验数据库并设置cookie   """
