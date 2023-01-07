@@ -11,7 +11,7 @@ from app.models.models import User
 from sqlalchemy.sql import and_
 
 # 项目版本
-PROJECT_VERSION = "V1.0"
+PROJECT_VERSION = "V1.1"
 
 # HTML 网页路径
 TEMPLATEs_PATH  = "templates/"
