@@ -1,10 +1,13 @@
+# -*- coding: utf-8 -*-
 '''
-Author: TheDraco
-Date: 2022-12-07 15:57:41
-LastEditTime: 2023-01-07 22:08:32
-Description:
-FilePath: /10_flask/app/views/user/views.py
+Author: liuyibo 1299502716@qq.com
+Date: 2023-01-07 12:47:25
+LastEditors: liuyibo 1299502716@qq.com
+LastEditTime: 2023-01-07 23:42:30
+FilePath: \Gateway_Management_System\app\views\login\views.py
+Description: 注册login模块的view视图
 '''
+
 from . import *
 from flask import render_template, request, make_response, redirect, url_for, session
 from app import db, redis_store

@@ -1,8 +1,9 @@
+# -*- coding: utf-8 -*-
 '''
 Author: liuyibo 1299502716@qq.com
 Date: 2023-01-07 12:47:25
 LastEditors: liuyibo 1299502716@qq.com
-LastEditTime: 2023-01-07 22:18:46
+LastEditTime: 2023-01-07 23:38:28
 FilePath: \Gateway_Management_System\main.py
 Description: 主函数
 '''

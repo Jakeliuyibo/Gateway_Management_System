@@ -1,7 +1,8 @@
+# -*- coding: utf-8 -*-
 '''
 Author: TheDraco
 Date: 2022-12-06 17:27:51
-LastEditTime: 2023-01-05 18:13:46
+LastEditTime: 2023-01-07 23:42:03
 Description: 
 FilePath: /10_flask/app/models/models.py
 '''

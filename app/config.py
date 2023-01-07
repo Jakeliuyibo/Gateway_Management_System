@@ -1,17 +1,18 @@
+# -*- coding: utf-8 -*-
 '''
 Author: liuyibo 1299502716@qq.com
 Date: 2023-01-07 19:06:57
 LastEditors: liuyibo 1299502716@qq.com
-LastEditTime: 2023-01-07 19:16:11
+LastEditTime: 2023-01-07 23:38:07
 FilePath: \Gateway_Management_System\app\config.py
-Description: Falsk APP配置文件
+Description: flask的默认配置
 '''
-import os
+import os, time, sys
 from datetime import timedelta
 from redis import StrictRedis
 
 '''
-description: 基础配置
+description: 基础配置类
 '''
 class Config(object):
     # 调试模式配置

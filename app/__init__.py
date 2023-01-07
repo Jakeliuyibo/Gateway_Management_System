@@ -1,8 +1,9 @@
+# -*- coding: utf-8 -*-
 '''
 Author: liuyibo 1299502716@qq.com
 Date: 2023-01-07 12:47:25
 LastEditors: liuyibo 1299502716@qq.com
-LastEditTime: 2023-01-07 22:18:51
+LastEditTime: 2023-01-07 23:40:26
 FilePath: \Gateway_Management_System\app\__init__.py
 Description: app文件夹自动初始化文件，创建Flask对象
 '''
@@ -42,3 +43,6 @@ def create_app(config_name):
     app.register_blueprint(login_blue , url_prefix="")       # register login blue
 
     return app
+
+def logs_init():
+    pass
