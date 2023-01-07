@@ -24,7 +24,6 @@ class app_config(object):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # redis配置
-    pass
 
 
 app.config.from_object(app_config)
