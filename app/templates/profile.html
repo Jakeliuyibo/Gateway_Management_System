@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Profile</title>
+
+        <!-- Meta -->
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+        <!-- js -->
+        <script src="/static/js/jquery-2.2.3.min.js"></script>
+        <!-- //js -->
+    </head>
+
+    <body>
+
+    <header class="header">
+
+        <form action="logout" method="get">
+            <!-- logout -->
+            <div class="logout" align="right">
+                <a href={{ url_for(".logout") }}>退出</a>
+            </div>
+        </form>
+
+        <div class="intro">
+            <div class="container text-center">
+                <h1 class="name">{{user_name}}</h1>
+                <div class="profile">
+                    <p>{{user_profile}}</p>
+                </div><!--//profile-->
+            </div><!--//container-->
+        </div><!--//intro-->
+    </header><!--//header-->
+    </body>
+</html>
