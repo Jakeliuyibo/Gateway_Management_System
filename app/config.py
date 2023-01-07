@@ -2,12 +2,12 @@
 '''
 Author: liuyibo 1299502716@qq.com
 Date: 2023-01-07 19:06:57
-LastEditors: liuyibo 1299502716@qq.com
-LastEditTime: 2023-01-07 23:38:07
+LastEditors: liuyibo_ubuntu 1299502716@qq.com
+LastEditTime: 2023-01-07 23:51:09
 FilePath: \Gateway_Management_System\app\config.py
 Description: flask的默认配置
 '''
-import os, time, sys
+import os
 from datetime import timedelta
 from redis import StrictRedis
 
