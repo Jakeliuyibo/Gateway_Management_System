@@ -23,6 +23,10 @@ class app_config(object):
     SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.getcwd() + "/app/db/users.db"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+    # redis配置
+    pass
+
+
 app.config.from_object(app_config)
 
 # 创建数据库ROM对象, 并关联Flask对象
