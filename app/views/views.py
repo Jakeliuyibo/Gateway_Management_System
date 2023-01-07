@@ -19,10 +19,10 @@ HTML_PATH       = ""
 
 
 # 创建蓝图，管理多个函数视图
-user1_blue = Blueprint("user", __name__, template_folder=TEMPLATEs_PATH + HTML_PATH)
+user_blue = Blueprint("user", __name__, template_folder=TEMPLATEs_PATH + HTML_PATH)
 
-@user1_blue.route("/")
-@user1_blue.route("/login")
+@user_blue.route("/")
+@user_blue.route("/login")
 def login():
     """ 登陆操作：从URL中获得login.html输入的用户名和密码，校验数据库并设置cookie   """
     ret = request.args
@@ -48,7 +48,7 @@ def login():
         return render_template(HTML_PATH + "login.html", version=PROJECT_VERSION)
 
 
-@user1_blue.route("/profile")
+@user_blue.route("/profile")
 def profile():
     """ 简历操作：校验cookie并查询数据库中用户信息   """
     # check cookie
@@ -66,7 +66,7 @@ def profile():
         return redirect("login")
 
 
-@user1_blue.route("/logout")
+@user_blue.route("/logout")
 def logout():
     """ 登出操作：删除cookie并转到登陆界面   """
     session.clear()

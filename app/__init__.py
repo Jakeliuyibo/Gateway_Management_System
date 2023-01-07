@@ -9,30 +9,26 @@ import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
-# SQLITE 数据库路径和URL
-SQLITE_DB_ABSOULTE_PATH = os.getcwd() + "/app/db/users.db"
-SQLITE_DB_URL = "sqlite:///" + SQLITE_DB_ABSOULTE_PATH
-print(SQLITE_DB_URL)
+# create flask object
+app = Flask(__name__)
 
-# 创建数据库ROM对象
+class app_config(object):
+    # 调试模式
+    DEBUG = True
+
+    # session配置
+    SECRET_KEY = os.urandom(24)
+
+    # 数据库配置
+    SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.getcwd() + "/app/db/users.db"
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+app.config.from_object(app_config)
+
+# 创建数据库ROM对象, 并关联Flask对象
 db = SQLAlchemy()
+db.init_app(app)
 
-def create_app():
-    # create flask object
-    app = Flask(__name__)
-
-    # 使用session密钥
-    app.config['SECRET_KEY'] = os.urandom(24)
-    # 设置数据库的链接地址
-    app.config["SQLALCHEMY_DATABASE_URI"] = SQLITE_DB_URL
-    # 关闭追踪数据库的修改
-    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
-    # register admin blue
-    from app.views.views  import user1_blue
-    app.register_blueprint(user1_blue , url_prefix="")
-
-    # 关联数据库与Flask对象
-    db.init_app(app)
-
-    return app
+# register user blue
+from app.views.views  import user_blue
+app.register_blueprint(user_blue , url_prefix="")
