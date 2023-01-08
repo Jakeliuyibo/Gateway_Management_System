@@ -1,0 +1,24 @@
+2023-01-08 23:16:56,367 - _internal.py:_log[line:224] - INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://localhost:1234
+2023-01-08 23:16:56,367 - _internal.py:_log[line:224] - INFO: [33mPress CTRL+C to quit[0m
+2023-01-08 23:16:56,370 - _internal.py:_log[line:224] - INFO:  * Restarting with watchdog (inotify)
+2023-01-08 23:16:56,578 - _internal.py:_log[line:224] - WARNING:  * Debugger is active!
+2023-01-08 23:16:56,578 - _internal.py:_log[line:224] - INFO:  * Debugger PIN: 472-777-618
+2023-01-08 23:17:22,833 - _internal.py:_log[line:224] - INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://localhost:1234
+2023-01-08 23:17:22,834 - _internal.py:_log[line:224] - INFO: [33mPress CTRL+C to quit[0m
+2023-01-08 23:17:22,838 - _internal.py:_log[line:224] - INFO:  * Restarting with watchdog (inotify)
+2023-01-08 23:17:23,030 - _internal.py:_log[line:224] - WARNING:  * Debugger is active!
+2023-01-08 23:17:23,031 - _internal.py:_log[line:224] - INFO:  * Debugger PIN: 472-777-618
+2023-01-08 23:24:04,013 - _internal.py:_log[line:224] - INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://localhost:1234
+2023-01-08 23:24:04,013 - _internal.py:_log[line:224] - INFO: [33mPress CTRL+C to quit[0m
+2023-01-08 23:24:04,016 - _internal.py:_log[line:224] - INFO:  * Restarting with watchdog (inotify)
+2023-01-08 23:24:04,211 - _internal.py:_log[line:224] - WARNING:  * Debugger is active!
+2023-01-08 23:24:04,211 - _internal.py:_log[line:224] - INFO:  * Debugger PIN: 472-777-618
+2023-01-08 23:25:39,794 - _internal.py:_log[line:224] - INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://localhost:1234
+2023-01-08 23:25:39,794 - _internal.py:_log[line:224] - INFO: [33mPress CTRL+C to quit[0m
+2023-01-08 23:25:39,797 - _internal.py:_log[line:224] - INFO:  * Restarting with watchdog (inotify)
+2023-01-08 23:25:40,001 - _internal.py:_log[line:224] - WARNING:  * Debugger is active!
+2023-01-08 23:25:40,003 - _internal.py:_log[line:224] - INFO:  * Debugger PIN: 472-777-618

@@ -3,11 +3,12 @@
 Author: liuyibo 1299502716@qq.com
 Date: 2023-01-07 19:06:57
 LastEditors: liuyibo_ubuntu 1299502716@qq.com
-LastEditTime: 2023-01-07 23:51:09
+LastEditTime: 2023-01-08 23:24:49
 FilePath: \Gateway_Management_System\app\config.py
 Description: flask的默认配置
 '''
 import os
+import logging
 from datetime import timedelta
 from redis import StrictRedis
 
@@ -32,7 +33,12 @@ class Config(object):
     SESSION_REDIS = StrictRedis(host=REDIS_HOST, port=REDIS_PORT)   # 设置session redis服务器地址
     SESSION_USE_SIGNER = True                                       # 设置签名
     PERMANENT_SESSION_LIFETIME = timedelta(hours=1)                 # 设置session有效期one hour
-    
+
+    # logging配置
+    LOGGING_FILE_PATH = 'logs/log'                                  # 设置logging文件输出路径
+    LOGGING_FILE_HANDLER_LEVEL   = logging.INFO                     # 设置logging文件输出等级
+    LOGGING_STREAM_HANDLER_LEVEL = logging.INFO                     # 设置logging终端输出等级
+    LOGGING_FORMAT               = logging.Formatter('%(asctime)s - %(filename)s:%(funcName)s[line:%(lineno)d] - %(levelname)s: %(message)s')
 '''
 description: 开发配置
 '''
