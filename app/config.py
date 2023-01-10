@@ -2,8 +2,8 @@
 '''
 Author: liuyibo 1299502716@qq.com
 Date: 2023-01-07 19:06:57
-LastEditors: liuyibo_ubuntu 1299502716@qq.com
-LastEditTime: 2023-01-08 23:24:49
+LastEditors: liuyibo 1299502716@qq.com
+LastEditTime: 2023-01-10 14:41:35
 FilePath: \Gateway_Management_System\app\config.py
 Description: flask的默认配置
 '''
@@ -35,23 +35,25 @@ class Config(object):
     PERMANENT_SESSION_LIFETIME = timedelta(hours=1)                 # 设置session有效期one hour
 
     # logging配置
-    LOGGING_FILE_PATH = 'logs/log'                                  # 设置logging文件输出路径
-    LOGGING_FILE_HANDLER_LEVEL   = logging.INFO                     # 设置logging文件输出等级
-    LOGGING_STREAM_HANDLER_LEVEL = logging.INFO                     # 设置logging终端输出等级
-    LOGGING_FORMAT               = logging.Formatter('%(asctime)s - %(filename)s:%(funcName)s[line:%(lineno)d] - %(levelname)s: %(message)s')
+    LOGGING_FILE_PATH            = 'logs/log'                       # 设置logging文件输出路径
+    LOGGING_FILE_HANDLER_LEVEL   = logging.DEBUG                    # 设置logging文件输出等级
+    LOGGING_STREAM_HANDLER_LEVEL = logging.DEBUG                    # 设置logging终端输出等级
+    LOGGING_FILE_FORMAT          = logging.Formatter('%(asctime)s - %(filename)s:%(funcName)s[line:%(lineno)d] - %(levelname)s: %(message)s')
+    LOGGING_STREAM_FORMAT        = logging.Formatter('%(message)s')
 '''
 description: 开发配置
 '''
 class DevelopConfig(Config):
     # 调试模式配置
     DEBUG = True
-
 '''
 description: 生产配置
 '''
 class ProductConfig(Config):
     # 调试模式配置
     DEBUG = False
+    LOGGING_FILE_HANDLER_LEVEL   = logging.ERROR                    # 设置logging文件输出等级
+    LOGGING_STREAM_HANDLER_LEVEL = logging.ERROR                    # 设置logging终端输出等级
 
 config_dict = {
     "develop":  DevelopConfig,

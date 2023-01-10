@@ -2,8 +2,8 @@
 '''
 Author: liuyibo 1299502716@qq.com
 Date: 2023-01-07 12:47:25
-LastEditors: liuyibo_ubuntu 1299502716@qq.com
-LastEditTime: 2023-01-07 23:50:59
+LastEditors: liuyibo 1299502716@qq.com
+LastEditTime: 2023-01-10 14:40:53
 FilePath: \Gateway_Management_System\main.py
 Description: 主函数
 '''

@@ -2,8 +2,8 @@
 '''
 Author: liuyibo 1299502716@qq.com
 Date: 2023-01-07 12:47:25
-LastEditors: liuyibo_ubuntu 1299502716@qq.com
-LastEditTime: 2023-01-08 23:24:40
+LastEditors: liuyibo 1299502716@qq.com
+LastEditTime: 2023-01-10 14:42:41
 FilePath: \Gateway_Management_System\app\__init__.py
 Description: app文件夹自动初始化文件，创建Flask对象
 '''
@@ -53,6 +53,7 @@ description: init logging module
 return {*}
 '''
 def logs_init(binding_app, config):
+    
     # 创建logging对象
     mlogger = logging.getLogger()
     mlogger.setLevel(logging.DEBUG)
@@ -66,8 +67,8 @@ def logs_init(binding_app, config):
     # 配置logging等级与格式
     file_handler.setLevel(config.LOGGING_FILE_HANDLER_LEVEL)
     stream_handler.setLevel(config.LOGGING_STREAM_HANDLER_LEVEL)
-    file_handler.setFormatter(config.LOGGING_FORMAT)
-    stream_handler.setFormatter(config.LOGGING_FORMAT)
+    file_handler.setFormatter(config.LOGGING_FILE_FORMAT)
+    stream_handler.setFormatter(config.LOGGING_STREAM_FORMAT)
 
     # 为flask的日志记录器中添加handler
     mlogger.addHandler(file_handler)

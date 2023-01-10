@@ -3,11 +3,12 @@
 Author: liuyibo 1299502716@qq.com
 Date: 2023-01-07 12:47:25
 LastEditors: liuyibo 1299502716@qq.com
-LastEditTime: 2023-01-07 23:42:30
+LastEditTime: 2023-01-10 14:40:07
 FilePath: \Gateway_Management_System\app\views\login\views.py
 Description: 注册login模块的view视图
 '''
 
+import logging
 from . import *
 from flask import render_template, request, make_response, redirect, url_for, session
 from app import db, redis_store
@@ -17,7 +18,10 @@ from sqlalchemy.sql import and_
 @login_blue.route("/")
 def test():
     redis_store.set("name","test")
-    print(redis_store.get("name"))
+    # logging.debug(redis_store.get("name"))
+    logging.debug("debug")
+    logging.info("info")
+    logging.error("ERROR")
     return "test"
 
 @login_blue.route("/login")
