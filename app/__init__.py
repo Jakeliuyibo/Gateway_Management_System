@@ -3,7 +3,7 @@
 Author: liuyibo 1299502716@qq.com
 Date: 2023-01-07 12:47:25
 LastEditors: liuyibo 1299502716@qq.com
-LastEditTime: 2023-01-10 14:42:41
+LastEditTime: 2023-01-14 22:29:33
 FilePath: \Gateway_Management_System\app\__init__.py
 Description: app文件夹自动初始化文件，创建Flask对象
 '''
@@ -16,8 +16,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_session import Session
 
 # 声明全局变量
-db          = None      # 创建数据库ROM变量
-redis_store = None      # 创建redis变量
+db          = SQLAlchemy()      # 创建数据库ROM变量
+redis_store = None              # 创建redis变量
 
 def create_app(config_name):
     # create flask object
@@ -28,11 +28,10 @@ def create_app(config_name):
     app.config.from_object(config_obj)
 
     # init logging and binding app's handler
-    logs_init(app, config_obj)
+    if config_obj.LOGGING_CONFIG_ABLE:
+        logs_init(app, config_obj)
 
     # 关联数据库ROM和Flask对象
-    global db
-    db = SQLAlchemy()
     db.init_app(app)
 
     # 初始化redis对象，并从config获取redis配置
@@ -42,9 +41,14 @@ def create_app(config_name):
     # 创建session对象
     Session(app)
 
-    # 关联注册蓝图与Flask对象
+    # 关联index、login、device蓝图与Flask对象
+    from app.views.index  import index_blue
     from app.views.login  import login_blue
-    app.register_blueprint(login_blue , url_prefix="")       # register login blue
+    from app.views.device import device_blue
+
+    app.register_blueprint(index_blue)          # register index blue
+    app.register_blueprint(login_blue)          # register login blue
+    app.register_blueprint(device_blue)         # register device blue
 
     return app
 

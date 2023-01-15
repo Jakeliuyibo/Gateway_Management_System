@@ -3,7 +3,7 @@
 Author: liuyibo 1299502716@qq.com
 Date: 2023-01-07 19:06:57
 LastEditors: liuyibo 1299502716@qq.com
-LastEditTime: 2023-01-10 14:41:35
+LastEditTime: 2023-01-14 22:20:03
 FilePath: \Gateway_Management_System\app\config.py
 Description: flask的默认配置
 '''
@@ -20,7 +20,7 @@ class Config(object):
     DEBUG = True
 
     # 数据库配置
-    SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.getcwd() + "/app/db/users.db"
+    SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.getcwd() + "/app/db/gateway.db"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # redis配置，保存数据库地址、端口、session信息
@@ -35,8 +35,9 @@ class Config(object):
     PERMANENT_SESSION_LIFETIME = timedelta(hours=1)                 # 设置session有效期one hour
 
     # logging配置
+    LOGGING_CONFIG_ABLE          = False
     LOGGING_FILE_PATH            = 'logs/log'                       # 设置logging文件输出路径
-    LOGGING_FILE_HANDLER_LEVEL   = logging.DEBUG                    # 设置logging文件输出等级
+    LOGGING_FILE_HANDLER_LEVEL   = logging.WARNING                  # 设置logging文件输出等级
     LOGGING_STREAM_HANDLER_LEVEL = logging.DEBUG                    # 设置logging终端输出等级
     LOGGING_FILE_FORMAT          = logging.Formatter('%(asctime)s - %(filename)s:%(funcName)s[line:%(lineno)d] - %(levelname)s: %(message)s')
     LOGGING_STREAM_FORMAT        = logging.Formatter('%(message)s')

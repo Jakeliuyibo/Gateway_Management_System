@@ -1,0 +1,386 @@
+{% extends "device/base.html" %}
+{% block body %}
+
+"body": 
+[
+    {
+        "type": "grid",
+        "columns": [],
+        "id": "u:8398bb00f3f5"
+    },
+    {
+        "type": "tabs",
+        "tabsMode": "chrome",
+        "draggable": "true",
+        "tabs": 
+        [
+            {
+                "title": "基本信息",
+                "body": 
+                [
+                    {
+                        "type": "tpl",
+                        "tpl": "这是一段描述",
+                        "inline": false,
+                        "id": "u:99114c787ffb"
+                    },
+
+                    {
+                        "type": "crud",
+                        "name":"device_crud",
+                        // "initApi": "get:/device/data_operation",
+                        "api": "get:/device/data_operation",
+                        "quickSaveApi": "put:/device/data_operation/${device_id}",
+                        "quickSaveItemApi": "put:/device/data_operation/${device_id}",
+                        "saveImmediately":true,
+                        // "reload":"window",
+                        // "defaultParams": 
+                        // {
+                        //     "page": 1,
+                        //     "perPage": 50
+                        // },
+                        "data":
+                        {
+                            "label_name":["设备ID","名称","类型","状态","属性","描述","最后工作时间","最后编辑时间"],
+                        },
+
+                        "filter": 
+                        {
+                            "debug": false,
+                            "title": "条件搜索",
+                            "body": 
+                            [
+                                {
+                                    "type": "group",
+                                    "body": 
+                                    [
+                                        {
+                                            "type": "input-text",
+                                            "name": "device_id",
+                                            "label": "${label_name[0]}",
+                                            "clearable": true,
+                                            "size": "sm"
+                                        },
+                                        {
+                                            "type": "input-text",
+                                            "name": "device_name",
+                                            "label": "${label_name[1]}",
+                                            "clearable": true,
+                                            "size": "sm"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "actions": 
+                            [
+                                {
+                                    "type": "reset",
+                                    "label": "重置"
+                                },
+                                {
+                                    "type": "submit",
+                                    "level": "primary",
+                                    "label": "查询"
+                                }
+                            ]
+                        },
+                        "headerToolbar": 
+                        [
+                            "statistics",
+                            "bulkActions",
+                            {
+                                "type": "columns-toggler",
+                                "className": "pull-right",
+                                "align": "left"
+                            },
+                            {
+                                "type": "drag-toggler",
+                                "align": "left"
+                            },
+                            {
+                                "type": "pagination",
+                                "align": "left"
+                            },
+                            {
+                                "label": "",
+                                "icon": "fa fa-repeat",
+                                "type": "button",
+                                "actionType": "reload",
+                                "target": "device_crud",
+                                "align": "right"
+                            }
+                        ],
+                        "itemActions": 
+                        [
+                            {
+                                "type": "button",
+                                "label": "查看",
+                                "actionType": "dialog",
+                                "dialog": 
+                                {
+                                    "title": "设备信息",
+                                    "body": 
+                                    {
+                                        "type": "form",
+                                        "horizontal": 
+                                        {
+                                            "leftFixed": "md"
+                                        },
+                                        "body": 
+                                        [
+                                            {
+                                                "type": "input-text",
+                                                "name": "device_id",
+                                                "label": "${label_name[0]}",
+                                                "static": true,
+                                            },
+                                            {
+                                                "type": "divider"
+                                            },
+                                            {
+                                                "type": "input-text",
+                                                "name": "device_name",
+                                                "label": "${label_name[1]}",
+                                                "static": true,
+                                            },
+                                            {
+                                                "type": "input-text",
+                                                "name": "device_type",
+                                                "label": "${label_name[2]}",
+                                                "static": true,
+                                            },
+                                            {
+                                                "type": "switch",
+                                                "name": "device_status",
+                                                "label": "${label_name[3]}",
+                                            },
+                                            {
+                                                "type": "input-text",
+                                                "name": "device_property",
+                                                "label": "${label_name[4]}",
+                                                "static": true,
+                                            },
+                                            {
+                                                "type": "input-text",
+                                                "name": "device_description",
+                                                "label": "${label_name[5]}",
+                                                "static": true,
+                                            },
+                                            {
+                                                "type": "input-text",
+                                                "name": "last_work_time",
+                                                "label": "${label_name[6]}",
+                                                "static": true,
+                                            },
+                                            {
+                                                "type": "input-text",
+                                                "name": "last_edit_time",
+                                                "label": "${label_name[7]}",
+                                                "static": true,
+                                            },
+                                            {
+                                                "type": "divider"
+                                            },
+                                        ]
+                                    }
+                                }
+                            },
+                            {
+                                "type": "button",
+                                "label": "编辑",
+                                "actionType": "dialog",
+                                "dialog": 
+                                {
+                                    "position": "left",
+                                    "size": "lg",
+                                    "title": "编辑配置",
+                                    "body": 
+                                    {
+                                        "type": "form",
+                                        "horizontal": 
+                                        {
+                                            "leftFixed": "md"
+                                        },
+                                        "name": "sample-edit-form",
+                                        "api": "put:/device/data_operation/${device_id}",
+                                        "body": 
+                                        [
+                                            {
+                                                "type": "input-text",
+                                                "name": "device_id",
+                                                "label": "${label_name[0]}",
+                                                "required": true,
+                                                "static": true,
+                                            },
+                                            {
+                                                "type": "divider"
+                                            },
+                                            {
+                                                "type": "input-text",
+                                                "name": "device_name",
+                                                "label": "${label_name[1]}",
+                                                "required": true
+                                            },
+                                            {
+                                                "type": "input-text",
+                                                "name": "device_type",
+                                                "label": "${label_name[2]}",
+                                                "required": true
+                                            },
+                                            {
+                                                "type": "switch",
+                                                "name": "device_status",
+                                                "label": "${label_name[3]}"
+                                            },
+                                            {
+                                                "type": "input-text",
+                                                "name": "device_property",
+                                                "label": "${label_name[4]}"
+                                            },
+                                            {
+                                                "type": "input-text",
+                                                "name": "device_description",
+                                                "label": "${label_name[5]}"
+                                            },
+                                            {
+                                                "type": "input-text",
+                                                "name": "last_work_time",
+                                                "label": "${label_name[6]}",
+                                                "static": true,
+                                            },
+                                            {
+                                                "type": "input-text",
+                                                "name": "last_edit_time",
+                                                "label": "${label_name[7]}",
+                                                "static": true,
+                                            },
+                                            {
+                                                "type": "divider"
+                                            },
+                                        ]
+                                    }
+                                }
+                            },
+                            {
+                                "type": "button",
+                                "label": "删除",
+                                "actionType": "ajax",
+                                "confirmText": "您确认要删除?",
+                                "api": "delete:/device/data_operation/${device_id}"
+                            }
+                        ],
+
+                        "columns": 
+                        [
+                            {
+                                "type": "text",
+                                "name": "device_id",
+                                "label": "${label_name[0]}",
+                                "sortable": true,
+                                "searchable": true,
+                                "toggled": true,
+                            },
+                            {
+                                "type": "text",
+                                "name": "device_name",
+                                "label": "${label_name[1]}",
+                                "sortable": true,
+                                "searchable": true,
+                                "copyable": true,
+                                "toggled": true
+                            },
+                            {
+                                "type": "text",
+                                "name": "device_type",
+                                "label": "${label_name[2]}",
+                                "sortable": true,
+                                "toggled": true
+                            },
+                            {
+                                "type": "switch",
+                                "name": "device_status",
+                                "label": "${label_name[3]}",
+                                "sortable": true,
+                                "toggled": true,
+                                "quickEdit": 
+                                {
+                                    "mode": "inline",
+                                    "type": "switch",
+                                    "onText": "在线",
+                                    "offText": "离线",
+                                    "saveImmediately": true
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "name": "device_property",
+                                "label": "${label_name[4]}",
+                                "toggled": false,
+                            },
+                            {
+                                "type": "text",
+                                "name": "device_description",
+                                "label": "${label_name[5]}",
+                                "toggled": true,
+                                "quickEdit": 
+                                {
+                                    "type": "text",
+                                    validations:
+                                    {
+                                        maxLength:64,
+                                    },
+                                    "saveImmediately": true,
+                                }
+                            },
+                            {
+                                "type": "text",
+                                "name": "last_work_time",
+                                "label": "${label_name[6]}",
+                                "toggled": true,
+                            },
+                            {
+                                "type": "text",
+                                "name": "last_edit_time",
+                                "label": "${label_name[7]}",
+                                "toggled": false,
+                            },
+                        ],
+
+                        "footerToolbar": 
+                        [
+                            {
+                                "type": "export-excel",
+                                "filename": "data",
+                                "align": "right"
+                            },
+                            {
+                                "type": "tpl",
+                                "tpl": "一共有${device_count}条数据"
+                            }
+                        ]
+                    },
+
+
+
+
+                ],
+                "id": "u:740141ce188f"
+            },
+            {
+                "title": "选项卡2",
+                "body": [
+                    {
+                        "type": "tpl",
+                        "tpl": "内容2",
+                        "inline": false
+                    }
+                ]
+            }
+        ],
+        "id": "u:845181328286"
+    },
+],
+"id": "u:e87da5165839",
+
+
+{% endblock body %}

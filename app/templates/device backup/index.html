@@ -1,0 +1,48 @@
+{% extends "device/base.html" %}　
+
+{% block title %}
+{% endblock %}
+
+{% block styles %}
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}
+
+{% block main %}
+<div>
+    <table class="table table-hover table-light table-bordered table-striped">
+        <thead class="" style="background-color: rgb(52, 58, 64); color: rgb(255, 255, 255);">
+            <tr>
+                <th scope="col">设备序号</th>
+                <th scope="col">设备名称</th>
+                <th scope="col">设备类型</th>
+                <th scope="col">设备状态</th>
+                <th scope="col">设备属性</th>
+                <th scope="col">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {# 遍历设备列表 #}
+            {% for device in data.device_list %}
+            <tr>
+                <td scope="row"><i>{{ device.device_id }}</i></td>
+                <td scope="row"><i>{{ device.device_name }}</i></td>
+                <td scope="row"><i>{{ device.device_type }}</i></td>
+                <td scope="row"><i>{{ device.device_status }}</i></td>
+                <td scope="row"><i>{{ device.device_property }}</i></td>
+                <td>
+                    <a href="/device/upload/{{ device.device_id }}"><button type="button"
+                            class="btn btn-xs btn-danger">上传数据</button></a>
+                    <a href="/device/modify/{{ device.device_id }}"><button type="button" class="btn btn-xs btn-danger "
+                            style="margin-left: 10%;">修改配置</button></a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+
+
+{% endblock %}

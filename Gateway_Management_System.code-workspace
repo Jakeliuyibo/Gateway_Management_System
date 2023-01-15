@@ -6,6 +6,15 @@
 	],
 	"settings": {
 		"editor.suggest.snippetsPreventQuickSuggestions": false,
-		"aiXcoder.showTrayIcon": true
+		"aiXcoder.showTrayIcon": true,
+		"sqltools.connections": [
+			{
+				"previewLimit": 200,
+				"driver": "SQLite",
+				"name": "connect_to_db",
+				"database": "${workspaceFolder:Gateway_Management_System}/app/db/gateway.db"
+			}
+		],
+		"sqltools.useNodeRuntime": true
 	}
 }
