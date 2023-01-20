@@ -37,10 +37,8 @@
 			let amisJSON =
 			{
 
-
-
 				"type": "page",
-				"title": "跨域网关Web管理系统",
+				"title": "跨域网关Web管理系统 {{ version }}",
 				"aside": 
 				[
 					{
@@ -49,20 +47,15 @@
 						"links": 
             			[
 							{
-								"label": "设备概述",
+								"label": "系统概述",
 								"to": "/device/index",
 								"active": ""
 							},
 							{
 								"label": "数据传输",
-								"to": "/device/test",
+								"to": "/device/data",
 								"active": ""
 							},
-							{
-								"label": "配置管理",
-								"to": "/device/config",
-								"active": ""
-							}
 						],
 						"id": "u:6c69c11d7740"
 					}
@@ -71,7 +64,8 @@
 				"pullRefresh": {
 					"disabled": true
 				},
-				"toolbar": [
+				"toolbar": 
+				[
 					{
 						"type": "grid",
 						"columns":
@@ -123,8 +117,8 @@
 					}
 				],
 
-        {% block body %}
-        {% endblock body %}
+				{% block body %}
+				{% endblock body %}
 
 				"regions": 
 				[

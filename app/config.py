@@ -3,7 +3,7 @@
 Author: liuyibo 1299502716@qq.com
 Date: 2023-01-07 19:06:57
 LastEditors: liuyibo 1299502716@qq.com
-LastEditTime: 2023-01-14 22:20:03
+LastEditTime: 2023-01-16 19:48:42
 FilePath: \Gateway_Management_System\app\config.py
 Description: flask的默认配置
 '''
@@ -41,6 +41,12 @@ class Config(object):
     LOGGING_STREAM_HANDLER_LEVEL = logging.DEBUG                    # 设置logging终端输出等级
     LOGGING_FILE_FORMAT          = logging.Formatter('%(asctime)s - %(filename)s:%(funcName)s[line:%(lineno)d] - %(levelname)s: %(message)s')
     LOGGING_STREAM_FORMAT        = logging.Formatter('%(message)s')
+    
+    # upload文件上传配置
+    UPLOAD_FILE_STORAGE_PATH     = "storage/upload"                 # 设置上传文件存储路径
+
+    # 项目版本
+    PROJECT_VERSION              = "V1.1"
 '''
 description: 开发配置
 '''

@@ -3,7 +3,7 @@
 Author: liuyibo 1299502716@qq.com
 Date: 2023-01-07 12:47:25
 LastEditors: liuyibo 1299502716@qq.com
-LastEditTime: 2023-01-11 17:58:06
+LastEditTime: 2023-01-20 15:17:01
 FilePath: \Gateway_Management_System\app\views\login\views.py
 Description: 注册login模块的view视图
 '''
@@ -14,6 +14,7 @@ from flask import current_app, jsonify, render_template, request, make_response,
 from app import db, redis_store
 from app.models.models import User, Device
 from sqlalchemy.sql import and_
+from app.config import Config
 
 @login_blue.route("/")
 @login_blue.route("/index")
@@ -37,4 +38,4 @@ def index():
         # 设置响应，引导至profile界面
         return redirect("/device/index")
     else:
-        return render_template(HTML_PATH + "login.html", version=PROJECT_VERSION)
+        return render_template(HTML_PATH + "login.html", version=Config.PROJECT_VERSION)

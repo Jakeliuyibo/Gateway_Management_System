@@ -3,14 +3,12 @@
 Author: liuyibo 1299502716@qq.com
 Date: 2023-01-07 20:32:38
 LastEditors: liuyibo 1299502716@qq.com
-LastEditTime: 2023-01-11 17:49:48
+LastEditTime: 2023-01-20 15:16:19
 FilePath: \Gateway_Management_System\app\views\login\__init__.py
 Description: 
 '''
 from flask import Blueprint
 
-# 项目版本
-PROJECT_VERSION = "V1.1"
 
 # HTML 网页路径
 TEMPLATEs_PATH  = "templates/"

@@ -3,22 +3,25 @@
 Author: liuyibo 1299502716@qq.com
 Date: 2023-01-10 22:08:05
 LastEditors: liuyibo 1299502716@qq.com
-LastEditTime: 2023-01-15 16:52:50
+LastEditTime: 2023-01-20 15:21:52
 FilePath: \Gateway_Management_System\app\views\device\views.py
 Description: 注册device模块的view视图
 '''
 import logging
-
+import os
 from app.public import amis_ret
 from app.utils.get_time import get_current_time
-
+from app.config import Config
 from . import *
 from flask import current_app, jsonify, render_template, request, make_response, redirect, url_for, session, json
 from app import db, redis_store
-from app.models.models import User, Device
+from app.models.models import User, Device, Uploadfiles, Tasks
 from sqlalchemy.sql import and_
+from werkzeug.utils import secure_filename
 
-
+# """"""""""""""""""""""""""""""""""   页面操作   """"""""""""""""""""""""""""""""""
+# """"""""""""""""""""""""""""""""""   页面操作   """"""""""""""""""""""""""""""""""
+# """"""""""""""""""""""""""""""""""   页面操作   """"""""""""""""""""""""""""""""""
 def check_login_status():
     """ check login cookie from session """
     login_flag = session.get("login_flag")
@@ -29,17 +32,34 @@ def check_login_status():
     else:
         return False
 
-
 @device_blue.route("/")
 @device_blue.route("/index", methods=['GET'])
-def index():
+def get_index_html():
     """ 设备首页操作：校验cookie并查询数据库中用户信息   """
     if check_login_status():
-        return render_template(HTML_PATH + "index.html")
+        return render_template(HTML_PATH + "index.html", version=Config.PROJECT_VERSION)
     else:
         return redirect("/login/index")
 
+@device_blue.route("/data", methods=['GET'])
+def get_data_html():
+    """ 数据传输页面操作：校验cookie并查询数据库中用户信息   """
+    if check_login_status():
+        return render_template(HTML_PATH + "data.html", version=Config.PROJECT_VERSION)
+    else:
+        return redirect("/login/index")
 
+@device_blue.route("/logout", methods=['GET'])
+def logout():
+    """ 登出操作：删除cookie并转到登陆界面   """
+    # clear cookie
+    session.clear()
+    return amis_ret(data={},status=0,msg="退出登录成功")
+
+
+# """"""""""""""""""""""""""""""""""   数据操作：设备   """"""""""""""""""""""""""""""""""
+# """"""""""""""""""""""""""""""""""   数据操作：设备   """"""""""""""""""""""""""""""""""
+# """"""""""""""""""""""""""""""""""   数据操作：设备   """"""""""""""""""""""""""""""""""
 @device_blue.route('/data_operation', methods=['GET'])
 def get_devices_info():
     """ 获取数据库设备信息  """
@@ -114,15 +134,181 @@ def delete_device_info(device_id):
         logging.error(logging_msg)
         return amis_ret(data={}, status=-1, msg="删除设备失败")
 
-@device_blue.route("/logout", methods=['GET'])
-def logout():
-    """ 登出操作：删除cookie并转到登陆界面   """
-    ret_data = {}
-    if check_login_status():
-        ret_data['user_name'] = session.get("user_name")
 
-        # clear cookie
-        session.clear()
-        return amis_ret(data=ret_data,status=0,msg="退出登录成功",errors={})
+# """"""""""""""""""""""""""""""""""   文件操作：文件   """"""""""""""""""""""""""""""""""
+# """"""""""""""""""""""""""""""""""   文件操作：文件   """"""""""""""""""""""""""""""""""
+# """"""""""""""""""""""""""""""""""   文件操作：文件   """"""""""""""""""""""""""""""""""
+@device_blue.route('/file_operation/upload', methods=['GET'])
+def get_uploadfiles_info():
+    """ 获取数据库中上传文件信息  """
+    requst_args   = request.args
+
+    orderBy  = requst_args.get('orderBy')
+    orderDir = requst_args.get('orderDir')
+    search_file_id    = request.values.get('file_id')
+    search_file_name  = request.values.get('file_name')
+    try:
+        # 条件模糊查询
+        db_obj = db.session.query(Uploadfiles).filter(
+            Uploadfiles.file_id.like(f'%{search_file_id}%' if search_file_id else '%%'),
+            Uploadfiles.file_name.like(f'%{search_file_name}%' if search_file_name else '%%'))
+
+        if orderBy and orderDir:
+            # 排序
+            order = getattr(Uploadfiles, orderBy)        # equal: Uploadfiles.file_id
+            order = getattr(order, orderDir)()           # equal: order=order.asc()
+            db_obj = db_obj.order_by(order)
+
+        # 查询数据库中所有设备信息
+        files = db_obj.all()
+        files_count = db_obj.count()
+        files_list = [file.to_dict() for file in files]
+
+        ret_data = {
+            "files_count"  : files_count,
+            "files_list"   : files_list,
+        }
+        return amis_ret(data=ret_data, status=0, msg="查询已上传文件成功")
+    except Exception as e:
+        logging.error("SQL Error: try to query existed upload file" + str(e))
+        return amis_ret(data={}, status=-1, msg="查询已上传文件失败")
+
+@device_blue.route('/file_operation/upload', methods=['POST'])
+def receive_file_from_web():
+    """ 接收来自web端上传的文件  """
+    # deal request args
+    request_file_list = request.files.getlist("file")
+    request_file = request_file_list[0]
+
+    file_name           = request_file.filename
+    file_source         = session.get("user_name")
+    file_upload_time    = get_current_time()
+    file_local_storage_path = os.path.join(Config.UPLOAD_FILE_STORAGE_PATH, file_name)
+    
+    if os.path.exists(file_local_storage_path):
+        logging.error("UPLOAD Error: try to upload existed file"+ str(file_name))
+        return amis_ret(data={}, status=-1, msg="已存在相同命名文件")
     else:
-        return redirect("/login/index")
+        try:
+            # save file to local
+            request_file.save(file_local_storage_path)
+
+            # add record to db
+            file_size = os.path.getsize(file_local_storage_path)
+            db.session.add(Uploadfiles(file_name=file_name, file_size=file_size, file_source=file_source, file_upload_time=file_upload_time, file_local_storage_path=file_local_storage_path))
+            db.session.commit()
+
+            return amis_ret(data={}, status=0, msg="上传文件成功")
+
+        except Exception as e:
+            logging.error("UPLOAD Error: try to save file and add record to db"+ str(file_name) + str(e))
+            return amis_ret(data={}, status=-1, msg="上传文件失败")
+
+@device_blue.route('/file_operation/upload/<int:file_id>', methods=['DELETE'])
+def delete_uploadfile(file_id):
+    """ 删除数据库设备信息  """
+    try:
+        delete_file = db.session.query(Uploadfiles).filter_by(file_id=file_id)
+        delete_file_path = delete_file.first().file_local_storage_path
+
+        # delete record in db
+        delete_file.delete()
+        db.session.commit()
+
+        # delete file
+        if os.path.exists(delete_file_path):
+            os.remove(delete_file_path)
+
+        return amis_ret(data={}, status=0, msg="删除文件成功")
+
+    except Exception as e:
+        logging.error("SQL Error: try to delete file, fileid=" + str(file_id) + str(e))
+        return amis_ret(data={}, status=-1, msg="删除文件失败")
+
+
+
+# """"""""""""""""""""""""""""""""""   任务操作：任务   """"""""""""""""""""""""""""""""""
+# """"""""""""""""""""""""""""""""""   任务操作：任务   """"""""""""""""""""""""""""""""""
+# """"""""""""""""""""""""""""""""""   任务操作：任务   """"""""""""""""""""""""""""""""""
+@device_blue.route('/task_operation/<int:device_id>', methods=['GET'])
+def get_tasks_info_by_deviceid(device_id):
+    """ 获取数据库中设备对应的任务信息  """
+    try:
+        # 查询设备是否存在
+        get_device = db.session.query(Device).filter_by(device_id=device_id).first()
+        target_device_name = get_device.device_name
+        
+        try:
+            # 查询Tasks表对应设备的任务信息
+            db_obj = db.session.query(Tasks).filter_by(target_device_id=device_id)
+            tasks = db_obj.all()
+            tasks_count = db_obj.count()
+            
+            # make ret
+            tasks_list = [task.to_dict() for task in tasks]
+            ret_data = {
+                "target_device_name" : target_device_name,
+                "tasks_count"  : tasks_count,
+                "tasks_list"   : tasks_list,
+            }
+            return amis_ret(data=ret_data, status=0, msg="查询设备任务成功")
+        except Exception as e:
+            logging.error("SQL Error: try to query nonexisted task for device, id=%d ,"%(device_id) + str(e))
+            return amis_ret(data={}, status=-1, msg="查询设备任务失败")
+    except Exception as e:
+        logging.error("SQL Error: try to query nonexisted device, id=%d ,"%(device_id) + str(e))
+        return amis_ret(data={}, status=-1, msg="查询设备任务失败")
+
+
+@device_blue.route('/task_operation/<int:device_id>', methods=['POST'])
+def add_device_task_to_db(device_id):
+    """ 添加device_id设备的任务信息  """
+    requst_body     = request.get_data()   
+    requst_args     = json.loads(requst_body)
+    add_files_list  = str(requst_args["source_file_id"]).split(",")
+    try:
+        # query device
+        add_device = db.session.query(Device).filter_by(device_id=device_id).first()
+        if add_device:
+            for file_id in add_files_list:
+                try:
+                    # query file
+                    add_file = db.session.query(Uploadfiles).filter_by(file_id=file_id).first()
+
+                    # 构建任务属性（名称、优先级）
+                    add_task        = Tasks()
+                    add_task.target_device_id   = add_device.device_id
+                    add_task.target_device_name = add_device.device_name
+                    add_task.source_file_id   = add_file.file_id
+                    add_task.source_file_name = add_file.file_name
+                    add_task.source_file_size = add_file.file_size
+                    add_task.source_file_path = add_file.file_local_storage_path
+                    add_task.task_name          = "task device%d-file%d"%(add_task.target_device_id, add_task.source_file_id)
+                    add_task.task_priority      = "0"
+                    add_task.task_status        = "schedule"                    # success\pending\queue\schedule\fail
+                    add_task.task_submit_time   = get_current_time()
+                    add_task.task_submit_source = session.get("user_name")
+                    db.session.add(add_task)
+
+                except Exception as e:
+                    logging.error("SQL Error: try to find nonexisted file, id=%d ,"%(file_id) + str(e))
+            
+            # commit to db
+            db.session.commit()
+            return amis_ret(data={}, status=0, msg="添加任务成功")
+        else:
+            raise
+    except Exception as e:
+        logging.error("SQL Error: try to find nonexisted device, id=%d ,"%(device_id) + str(e))
+        return amis_ret(data={}, status=-1, msg="添加任务失败")
+
+@device_blue.route('/task_operation/<int:task_id>', methods=['DELETE'])
+def delete_task(task_id):
+    """ 删除task_id对应的任务记录  """
+    try:
+        db.session.query(Tasks).filter_by(task_id=task_id).delete()
+        db.session.commit()
+        return amis_ret(data={}, status=0, msg="删除任务成功")
+    except Exception as e:
+        logging.error("SQL Error: try to delete task, id=%d ,"%(task_id) + str(e))
+        return amis_ret(data={}, status=-1, msg="删除任务失败")
