@@ -1,5 +1,35 @@
+import datetime
 import time
-
+import datedays
 
 def get_current_time():
+    """ 获取当前时间 """
     return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+
+def transfer_format_from_date_to_datetime(date, type="start"):
+    """ 将日期格式转化为日期时间格式 """
+    date = datetime.datetime.strptime(date,"%Y-%m-%d")
+    if type == "start":     # format = "%Y-%m-%d 00:00:00"
+        return  date     
+    elif type == "end":     # format = "%Y-%m-%d 23:59:59"
+        return  date + datetime.timedelta(days=1) - datetime.timedelta(seconds=1)
+
+def transfer_format_from_datetime_to_date(date_time):
+    """ 将日期时间格式转化为日期格式 """
+    date = datetime.datetime.strptime(date_time,"%Y-%m-%d %H:%M:%S")
+    return date.strftime('%Y-%m-%d')
+
+def generate_datelist_by_startenddate(start_date, end_date):
+    """ 根据起始日期生成器件的日期列表 """
+    # str格式转化为datetime
+    start_date  = datetime.datetime.strptime(start_date,'%Y-%m-%d')
+    end_date    = datetime.datetime.strptime(end_date,'%Y-%m-%d')
+
+    date_list = []
+    date_list.append(start_date.strftime('%Y-%m-%d'))
+    while start_date < end_date:
+        # 日期叠加一天
+        start_date = start_date + datetime.timedelta(days=1)
+        # 日期转字符串存入列表
+        date_list.append(start_date.strftime('%Y-%m-%d'))
+    return date_list

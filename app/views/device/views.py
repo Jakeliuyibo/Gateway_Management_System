@@ -3,14 +3,14 @@
 Author: liuyibo 1299502716@qq.com
 Date: 2023-01-10 22:08:05
 LastEditors: liuyibo 1299502716@qq.com
-LastEditTime: 2023-01-20 15:21:52
+LastEditTime: 2023-01-26 14:46:28
 FilePath: \Gateway_Management_System\app\views\device\views.py
 Description: 注册device模块的view视图
 '''
 import logging
 import os
 from app.public import amis_ret
-from app.utils.get_time import get_current_time
+from app.utils.get_time import get_current_time, transfer_format_from_date_to_datetime, generate_datelist_by_startenddate,transfer_format_from_datetime_to_date
 from app.config import Config
 from . import *
 from flask import current_app, jsonify, render_template, request, make_response, redirect, url_for, session, json
@@ -312,3 +312,177 @@ def delete_task(task_id):
     except Exception as e:
         logging.error("SQL Error: try to delete task, id=%d ,"%(task_id) + str(e))
         return amis_ret(data={}, status=-1, msg="删除任务失败")
+
+
+def dealargs_for_function_get_alldevices_taskinfo_for_chart():
+    """ 处理图表函数的参数  """
+    requst_args      = request.args
+    selectdaterange  = requst_args.get('selectdaterange').split(",")    # 选择的日期范围
+    selectunit       = requst_args.get('selectunit')                    # 选择的单位
+    selectdevice     = requst_args.get('selectdevice').split(",")       # 选择的设备
+
+    if selectdaterange and selectunit and selectdevice:
+        # 处理日期范围
+        start_date       = selectdaterange[0]
+        end_date         = selectdaterange[1]
+        start_datetime   = transfer_format_from_date_to_datetime(start_date, "start")
+        end_datetime     = transfer_format_from_date_to_datetime(end_date, "end")
+        selectdate_list  = generate_datelist_by_startenddate(start_date, end_date)
+
+        # 处理单位
+        size_divisior = 1
+        if selectunit == "B":
+            size_divisior = 1
+        elif selectunit == "KB":
+            size_divisior = 1024
+        elif selectunit == "MB":
+            size_divisior = 1024 * 1024
+        elif selectunit == "GB":
+            size_divisior = 1024  * 1024 * 1024
+
+        # 处理设备
+        selectdeviceid_list = []
+        selectdevicename_list = []
+        selectdevicedesc_list = []
+        for device_id in selectdevice:
+            try:
+                # 查询设备是否存在
+                device_obj = db.session.query(Device).filter_by(device_id=device_id).first()
+                selectdeviceid_list.append(device_obj.device_id)
+                selectdevicename_list.append(device_obj.device_name)
+                selectdevicedesc_list.append(device_obj.device_description)
+            except:
+                pass
+    return selectunit, start_datetime, end_datetime, selectdate_list, size_divisior, selectdeviceid_list, selectdevicename_list, selectdevicedesc_list
+
+@device_blue.route('/task_operation/chart1', methods=['GET'])
+def get_alldevices_taskinfo_for_chart1():
+    """ 获取数据库中设备任务的设备与总流量图表  """
+    selectunit, start_datetime, end_datetime, selectdate_list, size_divisior, selectdeviceid_list, selectdevicename_list, selectdevicedesc_list = dealargs_for_function_get_alldevices_taskinfo_for_chart()
+    if selectdeviceid_list:
+        # 初始化echarts图表
+        ret_data = {
+            "title": {"text": "设备-流量情况"},
+            "tooltip":
+            {
+                "trigger":"axis",
+                "axisPointer":{"type":"shadow"}
+            },
+            "toolbox":{"show":"true","feature":{"saveAsImage":{}}},
+            "legend": {"data":[],},
+            "xAxis":
+            {
+                "type":"category",
+                "name":"设备",
+                "data": ['任务总数', '流量总数', '平均传输速率'],
+                "axisTick": 
+                {
+                    "alignWithLabel": "true"
+                }
+            },
+            "yAxis":
+            {
+                "type":"value",
+                "name":"数据流量/ " + selectunit,
+            },
+            "series":[],
+        }
+
+        # 遍历选择的设备
+        task_count_list     = [0] * len(selectdeviceid_list)        # 统计：任务总数
+        dataflow_count_list = [0] * len(selectdeviceid_list)        # 统计：流量
+        transfer_speed_list = [0] * len(selectdeviceid_list)        # 统计：平均传输速率
+        for idx, device_id in enumerate(selectdeviceid_list):
+            try:
+                # 查询Tasks表对应设备的任务信息
+                db_obj = db.session.query(Tasks).filter_by(target_device_id=device_id).filter(and_(Tasks.task_finish_time>start_datetime, Tasks.task_finish_time<end_datetime, Tasks.task_status=="success"))
+                
+                tasks = db_obj.all()
+                for task in tasks:
+                    task_count_list[idx]     += 1
+                    dataflow_count_list[idx] += int(task.source_file_size)
+                    transfer_speed_list[idx] += int(task.task_transfer_speed)
+            except Exception as e:
+                pass
+
+            dataflow_count_list[idx] = round(dataflow_count_list[idx] / size_divisior, 2)
+            
+            if task_count_list[idx] > 0:
+                transfer_speed_list[idx] = round(transfer_speed_list[idx] / task_count_list[idx], 2)
+
+            ret_data["series"].append({
+                    "name": selectdevicedesc_list[idx],
+                    "type":"bar",
+                    "data": [task_count_list[idx], dataflow_count_list[idx], transfer_speed_list[idx]],
+                    "showBackground": "true",
+                    "emphasis": {"focus": 'series'},
+                    "label": {"show": "true",},
+                })
+        ret_data["legend"]["data"] = selectdevicedesc_list
+        return amis_ret(data=ret_data, status=0, msg="查询设备任务图表成功")
+    else:
+        return amis_ret(data={}, status=-1, msg="查询设备任务图表失败")
+
+@device_blue.route('/task_operation/chart2', methods=['GET'])
+def get_alldevices_taskinfo_for_chart2():
+    """ 获取数据库中设备任务的日期与设备流量图表  """
+    selectunit, start_datetime, end_datetime, selectdate_list, size_divisior, selectdeviceid_list, selectdevicename_list, selectdevicedesc_list = dealargs_for_function_get_alldevices_taskinfo_for_chart()
+    if selectdeviceid_list:
+        # 初始化echarts图表
+        ret_data = {
+            "title": {"text": "日期-流量情况"},
+            "tooltip":
+            {
+                "trigger":"axis",
+                "axisPointer":{"type":"cross"}
+            },
+            "toolbox":{"show":"true","feature":{"saveAsImage":{}}},
+            "legend": {"data":[],},
+            "xAxis":
+            {
+                "type":"category",
+                "name":"日期/ 天",
+                "boundaryGap":"false",
+                "data": selectdate_list
+            },
+            "yAxis":
+            {
+                "type":"value",
+                "name":"数据流量/ " + selectunit,
+                "axisLabel":{"formatter":"{value}"},
+                "axisPointer":{"snap":"true"},
+            },
+            "series":[],
+        }
+
+        # 遍历选择的设备
+        for idx, device_id in enumerate(selectdeviceid_list):
+            dataflow_list    = [0] * len(selectdate_list)
+            try:
+                # 查询Tasks表对应设备的任务信息
+                db_obj = db.session.query(Tasks).filter_by(target_device_id=device_id).filter(and_(Tasks.task_finish_time>start_datetime, Tasks.task_finish_time<end_datetime, Tasks.task_status=="success"))
+                
+                tasks = db_obj.all()
+                for task in tasks:
+                    task_finish_date = transfer_format_from_datetime_to_date(task.task_finish_time)
+                    if task_finish_date in selectdate_list:
+                        dataflow_list[selectdate_list.index(task_finish_date)] += round(int(task.source_file_size) / size_divisior, 2)
+
+                ret_data["legend"]["data"].append(selectdevicedesc_list[idx])
+                ret_data["series"].append({
+                        "name": selectdevicedesc_list[idx],
+                        "type":"line",
+                        "smooth":"true",
+                        "data":dataflow_list,
+                        "markPoint": {"data": [{ "type": 'max', "name": 'Max' }]},
+                    })
+            except Exception as e:
+                pass
+
+        if ret_data["series"]:
+            return amis_ret(data=ret_data, status=0, msg="查询设备任务图表成功")
+        else:
+            logging.error("Chart Error: try to query task chart for device")
+            return amis_ret(data=ret_data, status=-1, msg="查询设备任务图表失败")
+    else:
+        return amis_ret(data={}, status=-1, msg="查询设备任务图表失败")

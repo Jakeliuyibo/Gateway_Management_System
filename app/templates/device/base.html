@@ -36,7 +36,6 @@
 			// 通过替换下面这个配置来生成不同页面
 			let amisJSON =
 			{
-
 				"type": "page",
 				"title": "跨域网关Web管理系统 {{ version }}",
 				"aside": 
@@ -44,6 +43,7 @@
 					{
 						"type": "nav",
 						"stacked": true,
+						"className":"text-lg font-normal font-sans leading-10",
 						"links": 
             			[
 							{
@@ -57,11 +57,11 @@
 								"active": ""
 							},
 						],
-						"id": "u:6c69c11d7740"
 					}
 				],
 				"asideResizor": false,
-				"pullRefresh": {
+				"pullRefresh": 
+				{
 					"disabled": true
 				},
 				"toolbar": 
@@ -69,51 +69,46 @@
 					{
 						"type": "grid",
 						"columns":
-							[
-								{
-									"body":
-										[
-											{
-												"type": "input-text",
-												"label": "hello，",
-												"name": "user_name",
-												"id": "u:09c426923579",
-												"size": "xs",
-												"readOnly": true,
-												"value": "{{ session.user_name }}",
-												"static": false,
-												"disabled": false,
-												"mode": "inline"
-											}
-										],
-									"id": "u:5e035171d24e",
-									"md": 10
-								},
-								{
-									"body":
-										[
-											{
-												// 退出按钮，请求类型=GET，URL=/device/logout
-												"type": "button",
-												"actionType": "ajax",
-												"label": "退出",
-												"level": "warning",
-												"api":
-												{
-													"method": "get",
-													"url": "/device/logout",
-													"data": {},
-												},
-												"redirect": "/login/index",
-												"id": "u:d3e8bfe9354a",
-												"size": "md",
-												"block": "true",
-											}
-										],
-									"id": "u:7b70bdf1d719"
-								}
-							],
-						"id": "u:53c168721720"
+						[
+							{
+								"columnClassName": "",
+								"body":
+								[
+									{
+										"type": "input-text",
+										"label": "欢迎您，",
+										"name": "user_name",
+										"size": "xs",
+										"readOnly": true,
+										"value": "{{ session.user_name }}",
+										"disabled": true,
+										"mode": "inline"
+									}
+								],
+								"xs": 10,
+							},
+							{
+								"columnClassName": "",
+								"body":
+								[
+									{
+										// 退出按钮，请求类型=GET，URL=/device/logout
+										"type": "button",
+										"actionType": "ajax",
+										"label": "退出",
+										"level": "warning",
+										"api":
+										{
+											"method": "get",
+											"url": "/device/logout",
+											"data": {},
+										},
+										"redirect": "/login/index",
+										"className": "w-xs rounded-3xl",
+									}
+								]
+							}
+						],
 					}
 				],
 
@@ -127,10 +122,6 @@
 					"header",
 					"body"
 				]
-
-
-
-
 			};
 			let amisScoped = amis.embed('#root', amisJSON);
 		})();

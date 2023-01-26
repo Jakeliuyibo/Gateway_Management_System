@@ -15,7 +15,7 @@
         [
             ////////////////////////数据传输---数据传输
             {
-                "title": "数据传输",
+                "title": "任务管理",
                 "body": 
                 [
                     {
@@ -341,11 +341,103 @@
                 "body": 
                 [
                     {
-                        "type": "tpl",
-                        "tpl": "内容3",
-                        "inline": false
-                    }
-                ]
+                        "type": "panel",
+                        "title": "条件筛选",
+                        "body": 
+                        [
+                            {
+                                "type": "form",
+                                "title": "过滤条件",
+                                "target": "chart1,chart2",
+                                "submitOnInit": true,
+                                "wrapWithPanel": false,
+                                "mode": "inline",
+                                "debug":true,
+                                "body": 
+                                [
+                                    {
+                                        "type": "input-date-range",
+                                        "name": "selectdaterange",
+                                        "value": "-10days",
+                                        "label": "日期范围",
+                                        "format": "YYYY-MM-DD",
+                                        "inputFormat": "YYYY-MM-DD",
+                                    },
+                                    {
+                                        "label": "单位",
+                                        "type": "select",
+                                        "name": "selectunit",
+                                        "value": "MB",
+                                        "options": ["B","KB","MB","GB"]
+                                    },
+                                    {
+                                        "type": "picker",
+                                        "name": "selectdevice",
+                                        "joinValues": true,
+                                        "valueField": "device_id",
+                                        "labelField": "device_name",
+                                        "label": "设备",
+                                        "source": "get:/device/data_operation",
+                                        "required": true,
+                                        "size": "xl",
+                                        "value": "1",
+                                        "multiple": true,
+                                        "pickerSchema": 
+                                        {
+                                            "mode": "table",
+                                            "name": "device_pickerSchema",
+                                            "data":{"label_name":["设备ID","名称","类型","状态","属性","描述","最后工作时间","最后编辑时间"],},
+                                            "footerToolbar": [{"type": "tpl","tpl": "一共有${device_count}条数据"}],
+                                            "columns": 
+                                            [
+                                                {"type": "text","name": "device_id","label": "${label_name[0]}","sortable": true,"searchable": true,"toggled": true,"static": true,},
+                                                {"type": "text","name": "device_name","label": "${label_name[1]}","sortable": true,"searchable": true,"toggled": true,"static": true,},
+                                                {"type": "text","name": "device_type","label": "${label_name[2]}","sortable": true,"toggled": true,"static": true,},
+                                                {"type": "switch","name": "device_status","label": "${label_name[3]}","sortable": true,"toggled": true,"disabled": true,},
+                                                {"type": "text","name": "device_property","label": "${label_name[4]}","toggled": false,"static": true,},
+                                                {"type": "text","name": "device_description","label": "${label_name[5]}","toggled": true,"static": true,},
+                                                {"type": "text","name": "last_work_time","label": "${label_name[6]}","toggled": true,"static": true,},
+                                                {"type": "text","name": "last_edit_time","label": "${label_name[7]}","toggled": false,"static": true,},
+                                            ]
+                                        },
+                                    },
+                                    {
+                                        "type": "submit",
+                                        "label": "提交",
+                                        "level":"primary"
+                                    },
+                                ],
+                                "actions": []
+                            },
+                            {
+                                "type": "divider",
+                                "className": "divide-blue-200",
+                            },
+                            {
+                                "type": "grid",
+                                "className": "m-t-lg",
+                                "columns": 
+                                [
+                                    {
+                                        "type": "chart",
+                                        "name": "chart1",
+                                        "initFetch": false,
+                                        "replaceChartOption": true,
+                                        "api": "get:/device/task_operation/chart1?selectdaterange=${selectdaterange}&selectunit=${selectunit}&selectdevice=${selectdevice}"
+                                    },
+                                    {
+                                        "type": "chart",
+                                        "name": "chart2",
+                                        "initFetch": false,
+                                        "replaceChartOption": true,
+                                        "api": "get:/device/task_operation/chart2?selectdaterange=${selectdaterange}&selectunit=${selectunit}&selectdevice=${selectdevice}"
+                                    },
+                                ]
+                            }
+                        ]
+                    },
+                ],
+                
             },
         ],
         "id": "u:845181328286"
