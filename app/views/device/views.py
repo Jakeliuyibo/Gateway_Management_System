@@ -3,7 +3,7 @@
 Author: liuyibo 1299502716@qq.com
 Date: 2023-01-10 22:08:05
 LastEditors: liuyibo 1299502716@qq.com
-LastEditTime: 2023-01-26 14:46:28
+LastEditTime: 2023-01-26 15:32:42
 FilePath: \Gateway_Management_System\app\views\device\views.py
 Description: 注册device模块的view视图
 '''
@@ -361,6 +361,7 @@ def get_alldevices_taskinfo_for_chart1():
     selectunit, start_datetime, end_datetime, selectdate_list, size_divisior, selectdeviceid_list, selectdevicename_list, selectdevicedesc_list = dealargs_for_function_get_alldevices_taskinfo_for_chart()
     if selectdeviceid_list:
         # 初始化echarts图表
+        statistical_item_list = ['任务总数', '流量总数', '平均传输速率']
         ret_data = {
             "title": {"text": "设备-流量情况"},
             "tooltip":
@@ -374,17 +375,13 @@ def get_alldevices_taskinfo_for_chart1():
             {
                 "type":"category",
                 "name":"设备",
-                "data": ['任务总数', '流量总数', '平均传输速率'],
+                "data": statistical_item_list,
                 "axisTick": 
                 {
                     "alignWithLabel": "true"
                 }
             },
-            "yAxis":
-            {
-                "type":"value",
-                "name":"数据流量/ " + selectunit,
-            },
+            "yAxis":{"type": 'value',},
             "series":[],
         }
 
@@ -406,9 +403,8 @@ def get_alldevices_taskinfo_for_chart1():
                 pass
 
             dataflow_count_list[idx] = round(dataflow_count_list[idx] / size_divisior, 2)
-            
             if task_count_list[idx] > 0:
-                transfer_speed_list[idx] = round(transfer_speed_list[idx] / task_count_list[idx], 2)
+                transfer_speed_list[idx] = round(transfer_speed_list[idx] / task_count_list[idx] / size_divisior, 2)
 
             ret_data["series"].append({
                     "name": selectdevicedesc_list[idx],
@@ -416,9 +412,10 @@ def get_alldevices_taskinfo_for_chart1():
                     "data": [task_count_list[idx], dataflow_count_list[idx], transfer_speed_list[idx]],
                     "showBackground": "true",
                     "emphasis": {"focus": 'series'},
-                    "label": {"show": "true",},
+                    "label": {"show": "true","position": 'top'},
                 })
         ret_data["legend"]["data"] = selectdevicedesc_list
+
         return amis_ret(data=ret_data, status=0, msg="查询设备任务图表成功")
     else:
         return amis_ret(data={}, status=-1, msg="查询设备任务图表失败")
