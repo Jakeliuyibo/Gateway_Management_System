@@ -3,7 +3,7 @@
 Author: liuyibo 1299502716@qq.com
 Date: 2023-01-07 19:06:57
 LastEditors: liuyibo 1299502716@qq.com
-LastEditTime: 2023-01-16 19:48:42
+LastEditTime: 2023-02-24 10:10:02
 FilePath: \Gateway_Management_System\app\config.py
 Description: flask的默认配置
 '''
