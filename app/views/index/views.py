@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 '''
+Copyright (C) 2022 - 2023 liuyibo. All Rights Reserved 
 Author: liuyibo 1299502716@qq.com
 Date: 2023-01-11 17:53:54
 LastEditors: liuyibo 1299502716@qq.com

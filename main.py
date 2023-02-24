@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 '''
-Author: liuyibo 1299502716@qq.com
+Copyright (C) 2022 - 2023 liuyibo. All Rights Reserved 
+Author: liuyibo 1299502716@qq.com 
 Date: 2023-01-07 12:47:25
 LastEditors: liuyibo 1299502716@qq.com
-LastEditTime: 2023-01-11 20:51:49
+LastEditTime: 2023-02-24 10:25:20
 FilePath: \Gateway_Management_System\main.py
 Description: 主函数
 '''

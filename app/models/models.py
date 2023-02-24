@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 '''
+<!-- Copyright (C) 2022 - 2023 liuyibo. All Rights Reserved  -->
 Author: TheDraco
 Date: 2022-12-06 17:27:51
 LastEditTime: 2023-01-18 14:19:39

@@ -1,4 +1,13 @@
 # -*- coding: utf-8 -*-
+'''
+Copyright (C) 2022 - 2023 liuyibo. All Rights Reserved 
+Author: liuyibo 1299502716@qq.com
+Date: 2023-01-13 23:10:21
+LastEditors: liuyibo 1299502716@qq.com
+LastEditTime: 2023-02-24 10:31:44
+FilePath: \Gateway_Management_System\app\public.py
+Description: 公共接口
+'''
 
 import json
 import  decimal
@@ -25,6 +34,5 @@ def amis_ret(data,status=0,msg='',errors={}):
 		t['errors']=errors
 		t['status']=422
 		t['msg']='验证错误'
-		pass
 	return json.dumps(t,ensure_ascii=False,cls=DecimalEncoder)
 
