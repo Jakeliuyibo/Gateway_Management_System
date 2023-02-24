@@ -1,9 +1,9 @@
                                                    Gateway Management System
 
-Brief
+Brief:
     The management system is developed using the AMIS framework of Baidu open-source and Flask Web framework. The front-end uses JSON for the configuration interface, and the back-end uses the default HTTP server of Flask to build responses. blueprint,session,sql(redis,sqlite) and other technologies are used to implement logical functions such as user login, device viewing, device editing, history viewing, and task submission
 
-Usage method
+Usage method:
     Install pyhton, flask, redis, sqlite related to environment, and then the terminal using the command python main.py, use the browser to access 127.0.0.1 + port number, you can access to the embedded Web!
 
 ![登录界面](https://user-images.githubusercontent.com/49876032/221079815-56105437-96dd-438b-af9a-f8976a88845f.png)
