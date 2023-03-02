@@ -13,7 +13,7 @@ from app import create_app
 
 if __name__ == "__main__":
     # create flask app
-    app = create_app("develop")
+    web_app = create_app("develop")
     
     # execute app
-    app.run(host="localhost", port="1234")
+    web_app.run(host="localhost", port="1234")

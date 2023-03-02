@@ -1,0 +1,6 @@
+datedays==2.2.1
+Flask==1.1.4
+Flask_Session==0.4.0
+Flask_SQLAlchemy==2.5.1
+SQLAlchemy==1.4.22
+Werkzeug==1.0.1
