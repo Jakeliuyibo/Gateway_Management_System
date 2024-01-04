@@ -358,12 +358,12 @@
                                 "body": 
                                 [
                                     {
-                                        "type": "input-date-range",
+                                        "type": "input-datetime-range",
                                         "name": "selectdaterange",
                                         "value": "-10days",
                                         "label": "日期范围",
-                                        "format": "YYYY-MM-DD",
-                                        "inputFormat": "YYYY-MM-DD",
+                                        "timeFormat": "HH:mm:ss",
+                                        "inputFormat": "YYYY-MM-DD HH:mm:ss",
                                     },
                                     {
                                         "label": "单位",
@@ -427,6 +427,13 @@
                                         "replaceChartOption": true,
                                         "api": "get:/device/task_operation/chart1?selectdaterange=${selectdaterange}&selectunit=${selectunit}&selectdevice=${selectdevice}"
                                     },
+                                ]
+                            },
+                            {
+                                "type": "grid",
+                                "className": "m-t-lg",
+                                "columns": 
+                                [
                                     {
                                         "type": "chart",
                                         "name": "chart2",

@@ -66,4 +66,4 @@ description: 运行测试APP
 '''
 def run_test_server(app):
     # execute app
-    app.run(host="localhost", port="1234", debug=False)
+    app.run(host="localhost", port="19999", debug=False)

@@ -26,15 +26,15 @@ class Config(object):
     OS_SYSTEM = platform.system()
     if OS_SYSTEM == 'Windows':      # ! Windows
         # 数据库配置
-        SQLALCHEMY_DATABASE_URI      = "sqlite:///" + "Y:/Studyplace_Web_Development/Gateway_System" + "/db/gateway.db"
-        LOGGING_FILE_PATH            = f'logs\web\{get_current_time_apply_to_filename()}.log'                           # 设置logging文件输出路径
+        SQLALCHEMY_DATABASE_URI      = "sqlite:///" + "Y:/Studyplace_Web_Development/Gateway_Management_System" + "/db/gateway.db"
+        LOGGING_FILE_PATH            = f'logs\{get_current_time_apply_to_filename()}.log'                           # 设置logging文件输出路径
         # upload文件上传配置
-        UPLOAD_FILE_STORAGE_PATH     = "Y:/Studyplace_Web_Development/Gateway_System/storage/upload/"                   # 设置上传文件存储路径
+        UPLOAD_FILE_STORAGE_PATH     = "Y:/Studyplace_Web_Development/Gateway_Management_System/storage/upload/"    # 设置上传文件存储路径
         # pika任务队列名称
         PIKA_TASKQUEUE_NAME          = 'web_task_queue_for_windows'
     else:                           # ! Linux
         SQLALCHEMY_DATABASE_URI      = f"sqlite:////home/nano/Gateway_System/db/gateway.db"
-        LOGGING_FILE_PATH            = f'/home/nano/Gateway_System/logs/web/{get_current_time_apply_to_filename()}.log' # 设置logging文件输出路径
+        LOGGING_FILE_PATH            = f'/home/nano/Gateway_System/logs/{get_current_time_apply_to_filename()}.log' # 设置logging文件输出路径
         # upload文件上传配置
         UPLOAD_FILE_STORAGE_PATH     = "/home/nano/Gateway_System/storage/upload/"                                      # 设置上传文件存储路径
         # pika任务队列名称
