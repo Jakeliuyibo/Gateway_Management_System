@@ -1,0 +1,8 @@
+*.py[cod]
+logs/*
+*.code-workspace
+storage/device/acoustic/*
+storage/device/optical/*
+storage/device/radio/*
+storage/device/satellite/*
+storage/upload/*

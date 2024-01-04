@@ -1,0 +1,4 @@
+生成requirements.txt命令：pipreqs ./ --encoding=utf-8
+统计工程代码量：ctrl+shift+p - count lines in directory
+linux（ubuntu）环境下执行sudo python main.py文件，需要添加sys路径sys.path.insert(0, r"/home/nano/.local/lib/python3.8/site-packages")
+linux（ubuntu）环境下需要用sudo pip install安装所有数据包，因为apache服务器默认用户为www.data；或者直接修改apache服务的用户和用户组

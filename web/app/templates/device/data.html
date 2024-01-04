@@ -1,0 +1,452 @@
+<!-- Copyright (C) 2022 - 2023 liuyibo. All Rights Reserved  -->
+
+{% extends "device/base.html" %}
+{% block body %}
+
+"body": [
+    {
+        "type": "grid",
+        "columns": [],
+        "id": "u:8398bb00f3f5"
+    },
+    {
+        "type": "tabs",
+        "tabsMode": "chrome",
+        "draggable": "true",
+        "tabs": 
+        [
+            ////////////////////////数据传输---数据传输
+            {
+                "title": "任务管理",
+                "body": 
+                [
+                    {
+                        "label": "",
+                        "icon": "fa fa-repeat",
+                        "type": "button",
+                        "actionType": "reload",
+                        "target": "device_cards",
+                        "align": "right"
+                    },
+                    {
+                        "type": "divider"
+                    },
+                    ////////////////////////数据传输---数据传输---设备列表
+                    {
+                        "type": "crud",
+                        "name":"device_cards",
+                        "mode": "cards",
+                        "api": "get:/device/data_operation",
+                        "quickSaveApi": "put:/device/data_operation/${device_id}",
+                        "quickSaveItemApi": "put:/device/data_operation/${device_id}",
+                        "draggable": false, 
+                        "selectable": false,
+                        "checkable": true,
+                        "multiple": false,
+                        "defaultParams": 
+                        {
+                            "perPage": 10
+                        },
+                        "data":
+                        {
+                            "label_name":["设备ID","名称","类型","状态","属性","描述","最后工作时间","最后编辑时间"],
+                        },
+
+                        "card": 
+                        {
+                            "type": "card",
+                            "source": "$device_list",
+                            "toolbar": [],
+                            "header": 
+                            {
+                                "title": "$device_name",
+                                // "subTitle": "$device_status",
+                                "description": "$device_description",
+                                "avatarText": "${device_name|substring:0:2|upperCase}",
+                                "avatarTextBackground": ["#FFB900","#D83B01","#B50E0E","#E81123","#B4009E","#5C2D91","#0078D7","#00B4FF","#008272"],
+                            },
+                            "actions": 
+                            [
+                                ////////////////////////数据传输---数据传输---设备列表---新增任务
+                                {
+                                    "type": "button",
+                                    "label": "新增任务",
+                                    "actionType": "dialog",
+                                    "dialog": 
+                                    {
+                                        "size": "xl",
+                                        "title": "文件列表",
+                                        "body": 
+                                        [
+                                            {
+                                                "type": "form",
+                                                "api": 
+                                                {
+                                                    "method": "post",
+                                                    "url": "/device/task_operation/${device_id}",
+                                                    "data": 
+                                                    {
+                                                        "source_file_id": "${file_picker}"
+                                                    },
+                                                },
+                                                "debug": false,
+                                                "body":
+                                                [
+                                                    {
+                                                        "type": "picker",
+                                                        "name": "file_picker",
+                                                        "joinValues": true,
+                                                        "valueField": "file_id",
+                                                        "labelField": "file_name",
+                                                        "label": "多选",
+                                                        "source": "get:/device/file_operation/upload",
+                                                        "size": "xl",
+                                                        "value": "",
+                                                        "multiple": true,
+                                                        "pickerSchema": 
+                                                        {
+                                                            "mode": "table",
+                                                            "name": "thelist",
+                                                            "data":
+                                                            {
+                                                                "label_name":["文件ID","名称","大小(Byte)","来源","上传时间","本地存储地址"],
+                                                            },
+                                                            "headerToolbar": 
+                                                            {
+                                                                "wrapWithPanel": false,
+                                                                "type": "form",
+                                                                "className": "text-right",
+                                                                "target": "thelist",
+                                                                "mode": "inline",
+                                                                "body": 
+                                                                [
+                                                                    {
+                                                                        "type": "input-text",
+                                                                        "name": "file_name",
+                                                                        "placeholder": "通过文件名搜索",
+                                                                        "addOn": 
+                                                                        {
+                                                                            "type": "submit",
+                                                                            "label": "搜索",
+                                                                            "level": "primary",
+                                                                            "icon": "fa fa-search pull-left"
+                                                                        }
+                                                                    },
+                                                                ]
+                                                            },
+                                                            "footerToolbar": 
+                                                            [
+                                                                {
+                                                                    "type": "tpl",
+                                                                    "tpl": "一共有${files_count}条数据"
+                                                                }
+                                                            ],
+                                                            "columns": 
+                                                            [
+                                                                {
+                                                                    "type": "text",
+                                                                    "name": "file_id",
+                                                                    "label": "${label_name[0]}",
+                                                                    "sortable": true,
+                                                                    "searchable": true,
+                                                                    "toggled": true,
+                                                                },
+                                                                {
+                                                                    "type": "text",
+                                                                    "name": "file_name",
+                                                                    "label": "${label_name[1]}",
+                                                                    "sortable": true,
+                                                                    "searchable": true,
+                                                                    "toggled": true
+                                                                },
+                                                                {
+                                                                    "type": "text",
+                                                                    "name": "file_size",
+                                                                    "label": "${label_name[2]}",
+                                                                    "sortable": true,
+                                                                    "toggled": true
+                                                                },
+                                                                {
+                                                                    "type": "text",
+                                                                    "name": "file_source",
+                                                                    "label": "${label_name[3]}",
+                                                                    "sortable": true,
+                                                                    "toggled": true
+                                                                },
+                                                                {
+                                                                    "type": "text",
+                                                                    "name": "file_upload_time",
+                                                                    "sortable": true,
+                                                                    "label": "${label_name[4]}",
+                                                                    "toggled": true,
+                                                                },
+                                                                {
+                                                                    "type": "text",
+                                                                    "name": "file_local_storage_path",
+                                                                    "label": "${label_name[5]}",
+                                                                    "toggled": false,
+                                                                },
+                                                            ]
+                                                        }
+                                                    }
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                },
+                                ////////////////////////数据传输---数据传输---设备列表---任务列表
+                                {
+                                    "type": "button",
+                                    "label": "任务列表",
+                                    "actionType": "dialog",
+                                    "dialog": 
+                                    {
+                                        "size": "xl",
+                                        "title": "任务列表",
+                                        "body": 
+                                        [
+                                            {
+                                                "type": "crud",
+                                                "name":"tasks_crud",
+                                                "api": "get:/device/task_operation/${device_id}",
+                                                "syncLocation": false,
+                                                "data":
+                                                {
+                                                    "label_name":["任务ID","名称","优先级","源文件ID","文件名","文件大小","文件路径","目的设备ID","设备名","提交时间","提交源","执行时间","完成时间","传输速度","状态"],
+                                                },
+                                                "columns": 
+                                                [
+                                                    {"type": "text","name": "task_id"               ,"label": "${label_name[0]}" , "toggled": true,},
+                                                    {"type": "text","name": "task_name"             ,"label": "${label_name[1]}" , "toggled": true,},
+                                                    {"type": "text","name": "task_priority"         ,"label": "${label_name[2]}" , "toggled": true,},
+                                                    {"type": "text","name": "source_file_id"        ,"label": "${label_name[3]}" , "toggled": true,},
+                                                    {"type": "text","name": "source_file_name"      ,"label": "${label_name[4]}" , "toggled": true,},
+                                                    {"type": "text","name": "source_file_size"      ,"label": "${label_name[5]}" , "toggled": true,},
+                                                    {"type": "text","name": "source_file_path"      ,"label": "${label_name[6]}" , "toggled": false,},
+                                                    {"type": "text","name": "target_device_id"      ,"label": "${label_name[7]}" , "toggled": false,},
+                                                    {"type": "text","name": "target_device_name"    ,"label": "${label_name[8]}" , "toggled": false,},
+                                                    {"type": "text","name": "task_submit_time"      ,"label": "${label_name[9]}" , "toggled": true,},
+                                                    {"type": "text","name": "task_submit_source"    ,"label": "${label_name[10]}", "toggled": false,},
+                                                    {"type": "text","name": "task_execute_time"     ,"label": "${label_name[11]}", "toggled": true,},
+                                                    {"type": "text","name": "task_finish_time"      ,"label": "${label_name[12]}", "toggled": true,},
+                                                    {"type": "text","name": "task_transfer_speed"   ,"label": "${label_name[13]}", "toggled": true,},
+                                                    {
+                                                        "name": "task_status",
+                                                        "label": "${label_name[13]}",
+                                                        "type": "mapping",
+                                                        "map": 
+                                                        {
+                                                            "*": 
+                                                            {
+                                                                "type": "status"
+                                                            }
+                                                        },
+                                                        "toggled": true,
+                                                    },
+                                                    {
+                                                        "type": "operation",
+                                                        "label": "操作",
+                                                        "buttons": 
+                                                        [
+                                                            {
+                                                                "type": "button",
+                                                                "label": "再次提交",
+                                                                "actionType": "ajax",
+                                                                "api": 
+                                                                {
+                                                                    "method": "post",
+                                                                    "url": "/device/task_operation/${device_id}",
+                                                                    "data": 
+                                                                    {
+                                                                        "source_file_id": "${source_file_id}"
+                                                                    },
+                                                                },
+                                                            },
+                                                            {
+                                                                "type": "button",
+                                                                "label": "删除",
+                                                                "actionType": "ajax",
+                                                                "confirmText": "您确认要删除?",
+                                                                "api": "delete:/device/task_operation/${task_id}"
+                                                            }
+                                                        ],
+                                                        "toggled": true,
+                                                    },
+                                                ],
+                                                "headerToolbar": 
+                                                [
+                                                    {"type": "reload","align": "right"},
+                                                    {"type": "tpl","tpl": "查询到 ${target_device_name} 设备一共有 ${tasks_count} 条数据"}
+                                                ],
+                                                "itemActions": [],
+                                            }
+                                        ]
+                                    }
+                                },
+                            ],
+
+                            "body":
+                            [
+                                {
+                                    "type": "form",
+                                    "mode": "horizontal",
+                                    "disabled": true,
+                                    "horizontal": 
+                                    {
+                                        "leftFixed": "sm"
+                                    },
+                                    "actions": [],
+                                    "wrapWithPanel": false,
+                                    "body":
+                                    [
+                                        {
+                                            "type": "divider"
+                                        },
+                                        {
+                                            "type": "input-text",
+                                            "className": "text-green-700 max-h-3",
+                                            "name": "device_id",
+                                            "label": "设备ID",
+                                        },
+                                        {
+                                            "type": "input-text",
+                                            "className": "max-h-3",
+                                            "name": "device_type",
+                                            "label": "类型",
+                                        },
+                                        {
+                                            "type": "switch",
+                                            "className": "max-h-3",
+                                            "size": "sm",
+                                            "name": "device_status",
+                                            "label": "状态",
+                                            "onText": "在线",
+                                            "offText": "离线",
+                                        },
+                                        {
+                                            "type": "input-text",
+                                            "className": "max-h-11",
+                                            "name": "last_work_time",
+                                            "label": "最后工作时间",
+                                        },
+                                    ]
+                                },
+                            ]
+
+                        }
+                    }
+                ],
+                "id": "u:740141ce188f"
+            },
+            {
+                "title": "设备流量",
+                "body": 
+                [
+                    {
+                        "type": "panel",
+                        "title": "条件筛选",
+                        "body": 
+                        [
+                            {
+                                "type": "form",
+                                "title": "过滤条件",
+                                "target": "chart1,chart2",
+                                "submitOnInit": true,
+                                "wrapWithPanel": false,
+                                "mode": "inline",
+                                "debug":false,
+                                "body": 
+                                [
+                                    {
+                                        "type": "input-date-range",
+                                        "name": "selectdaterange",
+                                        "value": "-10days",
+                                        "label": "日期范围",
+                                        "format": "YYYY-MM-DD",
+                                        "inputFormat": "YYYY-MM-DD",
+                                    },
+                                    {
+                                        "label": "单位",
+                                        "type": "select",
+                                        "name": "selectunit",
+                                        "value": "MB",
+                                        "options": ["B","KB","MB","GB"]
+                                    },
+                                    {
+                                        "type": "picker",
+                                        "name": "selectdevice",
+                                        "joinValues": true,
+                                        "valueField": "device_id",
+                                        "labelField": "device_name",
+                                        "label": "设备",
+                                        "source": "get:/device/data_operation",
+                                        "required": true,
+                                        "size": "xl",
+                                        "value": "1",
+                                        "multiple": true,
+                                        "pickerSchema": 
+                                        {
+                                            "mode": "table",
+                                            "name": "device_pickerSchema",
+                                            "data":{"label_name":["设备ID","名称","类型","状态","属性","描述","最后工作时间","最后编辑时间"],},
+                                            "footerToolbar": [{"type": "tpl","tpl": "一共有${device_count}条数据"}],
+                                            "columns": 
+                                            [
+                                                {"type": "text","name": "device_id","label": "${label_name[0]}","sortable": true,"searchable": true,"toggled": true,"static": true,},
+                                                {"type": "text","name": "device_name","label": "${label_name[1]}","sortable": true,"searchable": true,"toggled": true,"static": true,},
+                                                {"type": "text","name": "device_type","label": "${label_name[2]}","sortable": true,"toggled": true,"static": true,},
+                                                {"type": "switch","name": "device_status","label": "${label_name[3]}","sortable": true,"toggled": true,"disabled": true,},
+                                                {"type": "text","name": "device_property","label": "${label_name[4]}","toggled": false,"static": true,},
+                                                {"type": "text","name": "device_description","label": "${label_name[5]}","toggled": true,"static": true,},
+                                                {"type": "text","name": "last_work_time","label": "${label_name[6]}","toggled": true,"static": true,},
+                                                {"type": "text","name": "last_edit_time","label": "${label_name[7]}","toggled": false,"static": true,},
+                                            ]
+                                        },
+                                    },
+                                    {
+                                        "type": "submit",
+                                        "label": "提交",
+                                        "level":"primary"
+                                    },
+                                ],
+                                "actions": []
+                            },
+                            {
+                                "type": "divider",
+                                "className": "divide-blue-200",
+                            },
+                            {
+                                "type": "grid",
+                                "className": "m-t-lg",
+                                "columns": 
+                                [
+                                    {
+                                        "type": "chart",
+                                        "name": "chart1",
+                                        "initFetch": false,
+                                        "replaceChartOption": true,
+                                        "api": "get:/device/task_operation/chart1?selectdaterange=${selectdaterange}&selectunit=${selectunit}&selectdevice=${selectdevice}"
+                                    },
+                                    {
+                                        "type": "chart",
+                                        "name": "chart2",
+                                        "initFetch": false,
+                                        "replaceChartOption": true,
+                                        "api": "get:/device/task_operation/chart2?selectdaterange=${selectdaterange}&selectunit=${selectunit}&selectdevice=${selectdevice}"
+                                    },
+                                ]
+                            }
+                        ]
+                    },
+                ],
+                
+            },
+        ],
+        "id": "u:845181328286"
+    },
+],
+"id": "u:e87da5165839",
+{% endblock body %}
+
+
+<!-- Copyright (C) 2022 - 2023 liuyibo. All Rights Reserved  -->

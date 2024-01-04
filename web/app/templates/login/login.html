@@ -1,0 +1,103 @@
+<!-- Copyright (C) 2022 - 2023 liuyibo. All Rights Reserved  -->
+
+<html>
+
+    <head>
+        <!-- Title -->
+        <title>Gateway System</title>
+        <!-- //Title -->
+
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+        <!-- Link Theme files -->
+        <link href="../../static/login/css/style.css" rel="stylesheet" type="text/css" media="all" />
+        <!-- //Link Theme files -->
+
+        <!-- js -->
+        <script src="../../static/login/js/jquery-2.2.3.min.js"></script>
+        <!-- //js -->
+
+        <!-- //favicon -->
+        <link rel="shortcut icon" href="../../static/login/images/favicon.ico">
+        <!-- //favicon -->
+    </head>
+
+    <body>
+        <!-- login html -->
+        <div class="main-agileits">
+            <h1>海空跨域网关系统 {{ version }}</h1>
+            <div class="mainw3-agileinfo form">
+                <div id="login">
+                    <form action="index" method="get">
+                        <!-- username -->
+                        <div class="field-wrap">
+                            <label> Your Name<span class="req">*</span> </label>
+                            <input type="username" required autocomplete="off" name="Username"/>
+                        </div>
+                        <!-- password -->
+                        <div class="field-wrap">
+                            <label> Your Password<span class="req">*</span> </label>
+                            <input type="password" required autocomplete="off" name="Password"/>
+                        </div>
+                        <!-- login button -->
+                        <!-- <button class="button button-block"/>Log In</button> -->
+                        <div class="submit">
+                            <input type="submit" value="Log In" >
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- //login html -->
+
+        <!-- copyright -->
+        <div class="mycopyright-agile">
+            <p>© All rights reserved | Design by Liuyibo , 2023</p>
+        </div>
+        <!-- //copyright -->
+
+        <!-- script -->
+        <script>
+            $('.form').find('input, textarea').on('keyup blur focus', function (e) { 
+            var $this = $(this),
+                label = $this.prev('label');
+                if (e.type === 'keyup')
+                {
+                    if ($this.val() === '')
+                    {
+                      label.removeClass('active highlight');
+                    }
+                    else
+                    {
+                      label.addClass('active highlight');
+                    }
+                }
+                else if (e.type === 'blur')
+                {
+                    if( $this.val() === '' )
+                    {
+                        label.removeClass('active highlight');
+                    }
+                    else
+                    {
+                        label.removeClass('highlight');
+                    }
+                }
+                else if (e.type === 'focus')
+                {
+                    if( $this.val() === '' )
+                    {
+                        label.removeClass('highlight');
+                    }
+                    else if( $this.val() !== '' )
+                    {
+                        label.addClass('highlight');
+                    }
+                }
+            });
+        </script>
+        <!-- //script -->
+    </body>
+</html>
+
+<!-- Copyright (C) 2022 - 2023 liuyibo. All Rights Reserved  -->
