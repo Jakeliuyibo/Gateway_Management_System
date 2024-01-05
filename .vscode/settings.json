@@ -1,0 +1,8 @@
+{
+    "search.exclude": {
+        "web/app/static": true,
+    },
+    "files.exclude": {
+
+    }
+}

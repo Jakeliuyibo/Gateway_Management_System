@@ -10,15 +10,18 @@ Description: 注册device模块的view视图
 '''
 import os
 import logging
+import threading
 import pika
 from flask import current_app, jsonify, render_template, request, make_response, redirect, url_for, session, json
 from . import *
-from ... import db, redis_store
+from ... import db, redis_store, pika_channel, app
 from ...public import amis_ret
 from ...utils.get_time import *
 from ...config import Config
-from ...models.models import User, Device, Uploadfiles, Tasks
+from ...models.models import *
+from ...models.event  import *
 from sqlalchemy.sql import and_
+
 
 # """"""""""""""""""""""""""""""""""   页面操作   """"""""""""""""""""""""""""""""""
 # """"""""""""""""""""""""""""""""""   页面操作   """"""""""""""""""""""""""""""""""
@@ -112,16 +115,46 @@ def modify_device_info(device_id):
             # modify device info
             requst_args = json.loads(requst_body)
             requst_args['last_edit_time'] = get_current_time()
-            modify_device.modify_from_dict(requst_args)
 
-            db.session.commit()
-            logging.critical(f"修改数据库中设备{device_id}信息成功")
-            return amis_ret(data={}, status=0, msg="修改设备成功")
+            # ! 检查是否打开或关闭模块
+            if modify_device.device_status != requst_args["device_status"]:
+
+                # 1、向数据库创建任务
+                try:
+                    sql_task                         = Tasks()
+                    sql_task.priority                = 0
+                    sql_task.submit_user             = session.get("user_name")
+                    db.session.add(sql_task)
+                    db.session.commit()
+
+                    if requst_args['device_status'] == True:
+                        sql_task.type                = Task_Type.DEVICE_OPEN.value
+                    else:
+                        sql_task.type                = Task_Type.DEVICE_CLOSE.value
+                    sql_task.status                  = "schedule"     # success\pending\queue\schedule\fail
+                    sql_task.submit_time             = get_current_time_with_ms()
+                    sql_task.oper_device_id          = device_id 
+                    sql_task.oper_device_name        = modify_device.device_name
+                except Exception as e:
+                    logging.error(f"创建设备({device_id})操作相关的任务错误， {e}")
+                finally:
+                    db.session.commit()
+
+                # 2、通过pika向控制软件发送任务处理
+                pika_channel.basic_publish(
+                    exchange = Config.RABBITMQ_EXCHANGENAME_IN, routing_key = Config.RABBITMQ_ROUTINGKEY_IN, 
+                    body = settle_device_event(sql_task.id, sql_task.type, device_id, ""))
+
+            # TODO 修改配置
+            # modify_device.modify_from_dict(requst_args)
+            # db.session.commit()
+            logging.critical(f"向数据库和控制软件申请修改设备{device_id}信息成功")
+            return amis_ret(data={}, status=0, msg="提交修改成功")
         else:
             raise
     except Exception as e:
-        logging.error(f"SQL Error: try to modify device{device_id}, 错误原因{e}")
-        return amis_ret(data={}, status=-1, msg="修改设备失败")
+        logging.error(f"尝试提交修改设备{device_id}信息异常, 错误原因{e}")
+        return amis_ret(data={}, status=-1, msg="提交修改失败")
 
 """ 删除数据库设备信息  """
 @device_blue.route('/data_operation/<int:device_id>', methods=['DELETE'])
@@ -312,25 +345,19 @@ def add_device_task_to_db(device_id):
             for task in add_task_list:
                 try:
                     # 创建发给给控制软件的任务
-                    web_task = {"task_id"   :   task.task_id,
-                                "file_name" :   task.source_file_name,
-                                "file_path" :   task.source_file_path,
-                                "device_id" :   task.target_device_id,
-                                "direct"    :   "DIRECT_FILE_TO_DEVICE",
-                                "priority"  :   "PRIOR_LOW"}
+                    web_task = settle_device_event(task.task_id, 
+                                                   Task_Type.DEVICE_WRITE.value, 
+                                                   task.target_device_id,
+                                                   task.source_file_path + task.source_file_name
+                                                   )
+
                     # 通过pika队列向控制软件发布任务
-                    try:
-                        connection = pika.BlockingConnection(pika.ConnectionParameters('localhost', '5672'))
-                        channel = connection.channel()
-                        channel.basic_publish(
-                            exchange='',                                # RabbitMQ中所有的消息都要先通过交换机，空字符串表示使用默认的交换机
-                            routing_key=Config.PIKA_TASKQUEUE_NAME,     # 指定消息要发送到哪个queue
-                            body=str(web_task))                         # 消息的内容
-                        logging.critical(f"向pika队列写入任务信息{task.task_id}成功")
-                    except Exception as e:
-                        logging.error(f"建立与控制软件的Pika RabbitMQ连接错误 {e}")
-                    finally:
-                        connection.close()
+                    pika_channel.basic_publish(
+                        exchange=Config.RABBITMQ_EXCHANGENAME_IN,   # RabbitMQ中所有的消息都要先通过交换机，空字符串表示使用默认的交换机
+                        routing_key=Config.RABBITMQ_ROUTINGKEY_IN,  # 指定消息要发送到哪个queue
+                        body=web_task)                              # 消息的内容
+
+                    logging.critical(f"向pika队列写入任务信息{task.task_id}成功")
                 except Exception as e:
                     logging.error(f"Task Error: 尝试发布任务到控制软件， 错误原因{e}")
 
@@ -461,7 +488,7 @@ def get_alldevices_taskinfo_for_chart1():
 @device_blue.route('/task_operation/chart2', methods=['GET'])
 def get_alldevices_taskinfo_for_chart2():
     selectunit, start_datetime, end_datetime, diff_datetime, size_divisior, selectdeviceid_list, selectdevicename_list, selectdevicedesc_list = dealargs_for_function_get_alldevices_taskinfo_for_chart()
-    
+
     # 监测查询设备列表是否为空
     if not selectdeviceid_list:
         return amis_ret(data={}, status=-1, msg="查询设备任务图表失败")
@@ -537,3 +564,54 @@ def get_alldevices_taskinfo_for_chart2():
     else:
         logging.error("Chart Error: try to query task chart for device")
         return amis_ret(data=ret_data, status=-1, msg="查询设备任务图表失败")
+
+
+# """"""""""""""""""""""""""""""""""   响应操作：事件   """"""""""""""""""""""""""""""""""
+# """"""""""""""""""""""""""""""""""   响应操作：事件   """"""""""""""""""""""""""""""""""
+# """"""""""""""""""""""""""""""""""   响应操作：事件   """"""""""""""""""""""""""""""""""
+def cb(ch, method, properties, body):
+    def parse_device_event(event_str: str):
+        event = json.loads(event_str)
+        id = event.get("id")
+        type = event.get("type")
+        device = event.get("device")
+        action = event.get("action")
+        status = event.get("status")
+        other = event.get("other")
+        return id, type, device, action, status, other
+    
+    # 1、解析来自控制应用的事件
+    try:
+        task_id, task_type, oper_device, oper_action, oper_status, other_info = parse_device_event(body)
+        logging.critical(f"PIKA读取到消息{body}")
+    except Exception as e:
+        logging.error(f"解析来自控制应用的事件({{body}})错误, {e}")
+
+    # 2、查询数据中设备情况
+    
+    try:
+        with app.app_context():
+            submit_task = db.session.query(Tasks).filter_by(id=task_id).first()
+            if submit_task:
+                # 3、更新任务进度
+                submit_task.finish_time = get_current_time_with_ms()
+                if oper_status == "success":
+                    submit_task.status = "success"
+                elif oper_status == "fail":
+                    submit_task.status = "fail"
+                else:
+                    raise Exception("事件的状态错误")
+            else:
+                raise "但未在数据库中查找到相应记录"
+    
+            db.session.commit()
+    except Exception as e:
+        logging.error(f"PIKA接收到控制应用的任务{task_id}出现异常，{e}")
+
+def pika_consumer(qu_name):
+    pika_channel.basic_consume(queue=qu_name, on_message_callback=cb, auto_ack=True)
+    pika_channel.start_consuming()
+
+# 监听pika
+th = threading.Thread(target=pika_consumer, args=(Config.RABBITMQ_QUEUENAME_OUT, ))
+th.start()

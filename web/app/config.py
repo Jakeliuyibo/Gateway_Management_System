@@ -47,6 +47,18 @@ class Config(object):
     REDIS_HOST = "127.0.0.1"
     REDIS_PORT = 6379
 
+    # pika配置
+    RABBITMQ_USER               = "user"
+    RABBITMQ_PASSWORD           = "123456"
+    RABBITMQ_HOSTNAME           = "localhost"
+    RABBITMQ_PORT               = 32770
+    RABBITMQ_EXCHANGENAME_IN    = "device1_ex_in"
+    RABBITMQ_QUEUENAME_IN       = "device1_qu_in"
+    RABBITMQ_ROUTINGKEY_IN      = "device1_in"
+    RABBITMQ_EXCHANGENAME_OUT   = "device1_ex_out"
+    RABBITMQ_QUEUENAME_OUT      = "device1_qu_out"
+    RABBITMQ_ROUTINGKEY_OUT     = "device1_out"
+
     # session配置
     SECRET_KEY = os.urandom(24)                                         # 设置session密钥
     SESSION_TYPE = "redis"                                              # 设置session存储类型
