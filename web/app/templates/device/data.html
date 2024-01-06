@@ -86,7 +86,7 @@
                                                     "url": "/device/task_operation/${device_id}",
                                                     "data": 
                                                     {
-                                                        "source_file_id": "${file_picker}"
+                                                        "oper_file_id": "${file_picker}"
                                                     },
                                                 },
                                                 "debug": false,
@@ -212,37 +212,29 @@
                                                 "syncLocation": false,
                                                 "data":
                                                 {
-                                                    "label_name":["任务ID","名称","优先级","源文件ID","文件名","文件大小","文件路径","目的设备ID","设备名","提交时间","提交源","执行时间","完成时间","传输速度","状态"],
+                                                    "label_name":["任务ID","优先级","类型","状态","提交用户","提交时间","调度时间","调度完成时间","完成时间","操作设备ID","操作设备名","操作文件ID","文件路径","文件名","文件大小","传输速率","修正后速率","备注"],
                                                 },
                                                 "columns": 
                                                 [
-                                                    {"type": "text","name": "task_id"               ,"label": "${label_name[0]}" , "toggled": true,},
-                                                    {"type": "text","name": "task_name"             ,"label": "${label_name[1]}" , "toggled": true,},
-                                                    {"type": "text","name": "task_priority"         ,"label": "${label_name[2]}" , "toggled": true,},
-                                                    {"type": "text","name": "source_file_id"        ,"label": "${label_name[3]}" , "toggled": true,},
-                                                    {"type": "text","name": "source_file_name"      ,"label": "${label_name[4]}" , "toggled": true,},
-                                                    {"type": "text","name": "source_file_size"      ,"label": "${label_name[5]}" , "toggled": true,},
-                                                    {"type": "text","name": "source_file_path"      ,"label": "${label_name[6]}" , "toggled": false,},
-                                                    {"type": "text","name": "target_device_id"      ,"label": "${label_name[7]}" , "toggled": false,},
-                                                    {"type": "text","name": "target_device_name"    ,"label": "${label_name[8]}" , "toggled": false,},
-                                                    {"type": "text","name": "task_submit_time"      ,"label": "${label_name[9]}" , "toggled": true,},
-                                                    {"type": "text","name": "task_submit_source"    ,"label": "${label_name[10]}", "toggled": false,},
-                                                    {"type": "text","name": "task_execute_time"     ,"label": "${label_name[11]}", "toggled": true,},
-                                                    {"type": "text","name": "task_finish_time"      ,"label": "${label_name[12]}", "toggled": true,},
-                                                    {"type": "text","name": "task_transfer_speed"   ,"label": "${label_name[13]}", "toggled": true,},
-                                                    {
-                                                        "name": "task_status",
-                                                        "label": "${label_name[13]}",
-                                                        "type": "mapping",
-                                                        "map": 
-                                                        {
-                                                            "*": 
-                                                            {
-                                                                "type": "status"
-                                                            }
-                                                        },
-                                                        "toggled": true,
-                                                    },
+                                                    {"type": "text"   , "name": "id"                     ,"label": "${label_name[0]}" , "toggled": true,                                 },
+                                                    {"type": "text"   , "name": "priority"               ,"label": "${label_name[1]}" , "toggled": true,                                 },
+                                                    {"type": "text"   , "name": "type"                   ,"label": "${label_name[2]}" , "toggled": true,                                 },
+                                                    {"type": "mapping", "name": "status"                 ,"label": "${label_name[3]}" , "toggled": true, "map": {"*": {"type": "status"}}},
+                                                    {"type": "text"   , "name": "submit_user"            ,"label": "${label_name[4]}" , "toggled": false,},
+                                                    {"type": "text"   , "name": "submit_time"            ,"label": "${label_name[5]}" , "toggled": false,},
+                                                    {"type": "text"   , "name": "sched_time"             ,"label": "${label_name[6]}" , "toggled": false,},
+                                                    {"type": "text"   , "name": "sched_finish_time"      ,"label": "${label_name[7]}" , "toggled": false,},
+                                                    {"type": "text"   , "name": "finish_time"            ,"label": "${label_name[8]}" , "toggled": false,},
+                                                    {"type": "text"   , "name": "oper_device_id"         ,"label": "${label_name[9]}" , "toggled": true,},
+                                                    {"type": "text"   , "name": "oper_device_name"       ,"label": "${label_name[10]}", "toggled": true,},
+                                                    {"type": "text"   , "name": "oper_file_id"           ,"label": "${label_name[11]}", "toggled": true,},
+                                                    {"type": "text"   , "name": "oper_file_path"         ,"label": "${label_name[12]}", "toggled": false,},
+                                                    {"type": "text"   , "name": "oper_file_name"         ,"label": "${label_name[13]}", "toggled": true,},
+                                                    {"type": "text"   , "name": "oper_file_size"         ,"label": "${label_name[14]}", "toggled": true,},
+                                                    {"type": "text"   , "name": "transfer_rate"          ,"label": "${label_name[15]}", "toggled": true,},
+                                                    {"type": "text"   , "name": "corrected_transfer_rate","label": "${label_name[16]}", "toggled": false,},
+                                                    {"type": "text"   , "name": "remark"                 ,"label": "${label_name[17]}", "toggled": false,},
+
                                                     {
                                                         "type": "operation",
                                                         "label": "操作",
@@ -258,7 +250,7 @@
                                                                     "url": "/device/task_operation/${device_id}",
                                                                     "data": 
                                                                     {
-                                                                        "source_file_id": "${source_file_id}"
+                                                                        "oper_file_id": "${oper_file_id}"
                                                                     },
                                                                 },
                                                             },
@@ -267,7 +259,7 @@
                                                                 "label": "删除",
                                                                 "actionType": "ajax",
                                                                 "confirmText": "您确认要删除?",
-                                                                "api": "delete:/device/task_operation/${task_id}"
+                                                                "api": "delete:/device/task_operation/${id}"
                                                             }
                                                         ],
                                                         "toggled": true,
@@ -276,7 +268,7 @@
                                                 "headerToolbar": 
                                                 [
                                                     {"type": "reload","align": "right"},
-                                                    {"type": "tpl","tpl": "查询到 ${target_device_name} 设备一共有 ${tasks_count} 条数据"}
+                                                    {"type": "tpl","tpl": "查询到 ${oper_device_name} 设备一共有 ${tasks_count} 条数据"}
                                                 ],
                                                 "itemActions": [],
                                             }

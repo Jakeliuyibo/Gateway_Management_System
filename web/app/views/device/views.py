@@ -145,11 +145,8 @@ def modify_device_info(device_id):
                     exchange = Config.RABBITMQ_EXCHANGENAME_IN, routing_key = Config.RABBITMQ_ROUTINGKEY_IN, 
                     body = settle_device_event(sql_task.id, sql_task.type, device_id, ""))
 
-            # TODO 修改配置
-            # modify_device.modify_from_dict(requst_args)
-            # db.session.commit()
             logging.critical(f"向数据库和控制软件申请修改设备{device_id}信息成功")
-            return amis_ret(data={}, status=0, msg="提交修改成功")
+            return amis_ret(data={}, status=0, msg="成功提交修改，请刷新")
         else:
             raise
     except Exception as e:
@@ -283,11 +280,12 @@ def get_tasks_info_by_deviceid(device_id):
 
         try:
             # 查询Tasks表对应设备的任务信息
-            db_obj = db.session.query(Tasks).filter_by(target_device_id=device_id)
+            db_obj = db.session.query(Tasks).filter_by(oper_device_id=device_id)
             tasks = db_obj.all()
             tasks_count = db_obj.count()
 
             # make ret
+            # TODO 修改前端
             tasks_list = [task.to_dict() for task in tasks]
             ret_data = {
                 "target_device_name" : target_device_name,
@@ -308,7 +306,7 @@ def get_tasks_info_by_deviceid(device_id):
 def add_device_task_to_db(device_id):
     requst_body     = request.get_data()
     requst_args     = json.loads(requst_body)
-    add_files_list  = str(requst_args["source_file_id"]).split(",")
+    add_files_list  = str(requst_args["oper_file_id"]).split(",")
     try:
         # query device
         add_device = db.session.query(Device).filter_by(device_id=device_id).first()
@@ -322,20 +320,24 @@ def add_device_task_to_db(device_id):
                     # 构建任务属性（名称、优先级）
                     add_task        = Tasks()
                     add_task_list.append(add_task)
-                    add_task.target_device_id   = add_device.device_id
-                    add_task.target_device_name = add_device.device_name
-                    add_task.source_file_id     = add_file.file_id
-                    add_task.source_file_name   = add_file.file_name
-                    add_task.source_file_size   = add_file.file_size
-                    add_task.source_file_path   = add_file.file_local_storage_path
-                    add_task.task_name          = "task device%d-file%d"%(add_task.target_device_id, add_task.source_file_id)
-                    add_task.task_priority      = "0"
-                    add_task.task_status        = "schedule"                    # success\pending\queue\schedule\fail
-                    add_task.task_submit_time   = get_current_time_with_ms()
-                    logging.critical(f"增加任务的时间{add_task.task_submit_time}")
-                    add_task.task_submit_source = session.get("user_name")
                     db.session.add(add_task)
-                    logging.critical(f"向数据库写入任务信息{add_task.task_name}成功")
+                    db.session.commit()
+
+                    add_task.priority           = "0"
+                    add_task.type               = Task_Type.DEVICE_WRITE.value
+                    add_task.status             = "schedule"                    # success\pending\queue\schedule\fail
+
+                    add_task.oper_device_id     = add_device.device_id
+                    add_task.oper_device_name   = add_device.device_name
+                    add_task.oper_file_id       = add_file.file_id
+                    add_task.oper_file_path     = add_file.file_local_storage_path
+                    add_task.oper_file_name     = add_file.file_name
+                    add_task.oper_file_size     = add_file.file_size
+
+                    add_task.submit_user        = session.get("user_name")
+                    add_task.submit_time        = get_current_time_with_ms()
+                    db.session.commit()
+                    logging.critical(f"向数据库新增write任务({add_task.id})成功")
                 except Exception as e:
                     logging.error(f"SQL Error: 尝试将任务（文件{file_id} 设备{add_device.device_id})写入数据库， 错误原因{e}")
 
@@ -344,20 +346,14 @@ def add_device_task_to_db(device_id):
 
             for task in add_task_list:
                 try:
-                    # 创建发给给控制软件的任务
-                    web_task = settle_device_event(task.task_id, 
-                                                   Task_Type.DEVICE_WRITE.value, 
-                                                   task.target_device_id,
-                                                   task.source_file_path + task.source_file_name
-                                                   )
-
                     # 通过pika队列向控制软件发布任务
                     pika_channel.basic_publish(
                         exchange=Config.RABBITMQ_EXCHANGENAME_IN,   # RabbitMQ中所有的消息都要先通过交换机，空字符串表示使用默认的交换机
                         routing_key=Config.RABBITMQ_ROUTINGKEY_IN,  # 指定消息要发送到哪个queue
-                        body=web_task)                              # 消息的内容
+                        body=settle_device_event(task.id, Task_Type.DEVICE_WRITE.value, 
+                            task.oper_device_id, task.oper_file_path + task.oper_file_name)) # 消息的内容
 
-                    logging.critical(f"向pika队列写入任务信息{task.task_id}成功")
+                    logging.critical(f"向pika队列写入任务信息{task.id}成功")
                 except Exception as e:
                     logging.error(f"Task Error: 尝试发布任务到控制软件， 错误原因{e}")
 
@@ -372,12 +368,12 @@ def add_device_task_to_db(device_id):
 @device_blue.route('/task_operation/<int:task_id>', methods=['DELETE'])
 def delete_task(task_id):
     try:
-        db.session.query(Tasks).filter_by(task_id=task_id).delete()
+        db.session.query(Tasks).filter_by(id=task_id).delete()
         db.session.commit()
-        logging.warning(f"删除数据库中任务信息{task_id}成功")
+        logging.warning(f"删除数据库中任务({task_id})成功")
         return amis_ret(data={}, status=0, msg="删除任务成功")
     except Exception as e:
-        logging.error("SQL Error: try to delete task, id=%d ,"%(task_id) + str(e))
+        logging.error(f"删除数据库任务({task_id})异常， {e}")
         return amis_ret(data={}, status=-1, msg="删除任务失败")
 
 """ 处理图表函数的参数  """
@@ -456,13 +452,15 @@ def get_alldevices_taskinfo_for_chart1():
         for idx, device_id in enumerate(selectdeviceid_list):
             try:
                 # 查询Tasks表对应设备的任务信息
-                db_obj = db.session.query(Tasks).filter_by(target_device_id=device_id).filter(and_(Tasks.task_finish_time>start_datetime, Tasks.task_finish_time<end_datetime, Tasks.task_status=="success"))
+                db_obj = db.session.query(Tasks).filter_by(oper_device_id=device_id).filter(and_(Tasks.finish_time>start_datetime, 
+                                                                                                 Tasks.finish_time<end_datetime, 
+                                                                                                 Tasks.status=="success"))
 
                 tasks = db_obj.all()
                 for task in tasks:
                     task_count_list[idx]     += 1
-                    dataflow_count_list[idx] += float(task.source_file_size)
-                    transfer_speed_list[idx] += float(task.task_transfer_speed)
+                    dataflow_count_list[idx] += float(task.oper_file_size)
+                    transfer_speed_list[idx] += float(task.transfer_rate)
             except Exception as e:
                 logging.error(f"渲染Chart1时查询设备{idx}的历史任务出错，错误原因{e}")
 
@@ -539,14 +537,16 @@ def get_alldevices_taskinfo_for_chart2():
         dataflow_list    = [0.0] * len(selectdate_list)
         try:
             # 查询Tasks表对应设备的任务信息
-            db_obj = db.session.query(Tasks).filter_by(target_device_id=device_id).filter(and_(Tasks.task_finish_time>start_datetime, Tasks.task_finish_time<end_datetime, Tasks.task_status=="success"))
+            db_obj = db.session.query(Tasks).filter_by(oper_device_id=device_id).filter(and_(Tasks.finish_time>start_datetime, 
+                                                                                             Tasks.finish_time<end_datetime, 
+                                                                                             Tasks.status=="success"))
 
             tasks = db_obj.all()
             for task in tasks:
 
-                task_finish_date = transfer_format_from_datetime_with_ms_to_date(task.task_finish_time, exp_format)
+                task_finish_date = transfer_format_from_datetime_with_ms_to_date(task.finish_time, exp_format)
                 if task_finish_date in selectdate_list:
-                    dataflow_list[selectdate_list.index(task_finish_date)] += round(float(task.source_file_size) / size_divisior, 2)
+                    dataflow_list[selectdate_list.index(task_finish_date)] += round(float(task.oper_file_size) / size_divisior, 2)
 
             ret_data["legend"]["data"].append(selectdevicedesc_list[idx])
             ret_data["series"].append({
@@ -570,16 +570,6 @@ def get_alldevices_taskinfo_for_chart2():
 # """"""""""""""""""""""""""""""""""   响应操作：事件   """"""""""""""""""""""""""""""""""
 # """"""""""""""""""""""""""""""""""   响应操作：事件   """"""""""""""""""""""""""""""""""
 def cb(ch, method, properties, body):
-    def parse_device_event(event_str: str):
-        event = json.loads(event_str)
-        id = event.get("id")
-        type = event.get("type")
-        device = event.get("device")
-        action = event.get("action")
-        status = event.get("status")
-        other = event.get("other")
-        return id, type, device, action, status, other
-    
     # 1、解析来自控制应用的事件
     try:
         task_id, task_type, oper_device, oper_action, oper_status, other_info = parse_device_event(body)
@@ -588,25 +578,38 @@ def cb(ch, method, properties, body):
         logging.error(f"解析来自控制应用的事件({{body}})错误, {e}")
 
     # 2、查询数据中设备情况
-    
-    try:
-        with app.app_context():
+    with app.app_context():
+        try:
             submit_task = db.session.query(Tasks).filter_by(id=task_id).first()
-            if submit_task:
-                # 3、更新任务进度
-                submit_task.finish_time = get_current_time_with_ms()
-                if oper_status == "success":
-                    submit_task.status = "success"
-                elif oper_status == "fail":
-                    submit_task.status = "fail"
-                else:
-                    raise Exception("事件的状态错误")
+            if not submit_task:
+                raise Exception("但未在数据库中查找到相应记录")
+            
+            # 3、更新任务进度
+            submit_task.finish_time = get_current_time_with_ms()
+            if oper_status == "success":
+                submit_task.status = "success"
+            elif oper_status == "fail":
+                submit_task.status = "fail"
+                raise Exception(f"控制程序执行错误")
             else:
-                raise "但未在数据库中查找到相应记录"
+                raise Exception("事件的状态错误")
+            
+            # 4、根据任务类型，修改数据库中设备情况
+            if      submit_task.type == Task_Type.DEVICE_OPEN.value \
+                or  submit_task.type == Task_Type.DEVICE_CLOSE.value:
+                # 查询数据库中该设备
+                oper_device = db.session.query(Device).filter_by(device_id=submit_task.oper_device_id).first()
+                oper_device.device_status = '1' if oper_device.device_status == '0' else '0'
+            elif submit_task.type == Task_Type.DEVICE_WRITE.value:
+                # 计算传输速率等
+                pass
+            else:
+                raise Exception("未实现的任务类型")
     
+        except Exception as e:
+            logging.error(f"PIKA接收到控制应用的任务{task_id}出现错误，{e}")
+        finally:
             db.session.commit()
-    except Exception as e:
-        logging.error(f"PIKA接收到控制应用的任务{task_id}出现异常，{e}")
 
 def pika_consumer(qu_name):
     pika_channel.basic_consume(queue=qu_name, on_message_callback=cb, auto_ack=True)
