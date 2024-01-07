@@ -25,6 +25,10 @@ def get_current_time_with_ms():
 def get_current_time_apply_to_filename():
     return time.strftime('%Y_%m_%d %H_%M_%S', time.localtime(time.time()))
 
+""" 获取当前日期 """
+def get_current_date_apply_to_filename():
+    return time.strftime('%Y_%m_%d', time.localtime(time.time()))
+
 # """ 将日期格式转化为日期时间格式 """
 # def transfer_format_from_date_to_datetime(date, type="start"):
 #     date = datetime.datetime.strptime(date,"%Y-%m-%d")

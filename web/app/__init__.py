@@ -24,9 +24,11 @@ db          = SQLAlchemy()      # 创建数据库ROM变量
 redis_store = None              # 创建redis变量
 
 # 初始化pika
-pika_credentials = pika.PlainCredentials(Config.RABBITMQ_USER, Config.RABBITMQ_PASSWORD)
-pika_connection  = pika.BlockingConnection(pika.ConnectionParameters(Config.RABBITMQ_HOSTNAME, Config.RABBITMQ_PORT, '/', pika_credentials, heartbeat=0))
-pika_channel     = pika_connection.channel()
+pika_credentials    = pika.PlainCredentials(Config.RABBITMQ_USER, Config.RABBITMQ_PASSWORD)
+pika_connection_in  = pika.BlockingConnection(pika.ConnectionParameters(Config.RABBITMQ_HOSTNAME, Config.RABBITMQ_PORT, '/', pika_credentials, heartbeat=0))
+pika_channel_in     = pika_connection_in.channel()
+pika_connection_out = pika.BlockingConnection(pika.ConnectionParameters(Config.RABBITMQ_HOSTNAME, Config.RABBITMQ_PORT, '/', pika_credentials, heartbeat=0))
+pika_channel_out    = pika_connection_out.channel()
 
 '''
 description: 创建Flask APP

@@ -14,7 +14,7 @@ import threading
 import pika
 from flask import current_app, jsonify, render_template, request, make_response, redirect, url_for, session, json
 from . import *
-from ... import db, redis_store, pika_channel, app
+from ... import db, redis_store, pika_channel_in, pika_channel_out, app
 from ...public import amis_ret
 from ...utils.get_time import *
 from ...config import Config
@@ -141,7 +141,7 @@ def modify_device_info(device_id):
                     db.session.commit()
 
                 # 2、通过pika向控制软件发送任务处理
-                pika_channel.basic_publish(
+                pika_channel_in.basic_publish(
                     exchange = Config.RABBITMQ_EXCHANGENAME_IN, routing_key = Config.RABBITMQ_ROUTINGKEY_IN, 
                     body = settle_device_event(sql_task.id, sql_task.type, device_id, ""))
 
@@ -347,7 +347,7 @@ def add_device_task_to_db(device_id):
             for task in add_task_list:
                 try:
                     # 通过pika队列向控制软件发布任务
-                    pika_channel.basic_publish(
+                    pika_channel_in.basic_publish(
                         exchange=Config.RABBITMQ_EXCHANGENAME_IN,   # RabbitMQ中所有的消息都要先通过交换机，空字符串表示使用默认的交换机
                         routing_key=Config.RABBITMQ_ROUTINGKEY_IN,  # 指定消息要发送到哪个queue
                         body=settle_device_event(task.id, Task_Type.DEVICE_WRITE.value, 
@@ -572,48 +572,57 @@ def get_alldevices_taskinfo_for_chart2():
 def cb(ch, method, properties, body):
     # 1、解析来自控制应用的事件
     try:
+        body = body.decode("utf-8").replace("\n", "").replace("\t", "")
         task_id, task_type, oper_device, oper_action, oper_status, other_info = parse_device_event(body)
-        logging.critical(f"PIKA读取到消息{body}")
+        logging.critical(f"PIKA读取到消息({body})")
     except Exception as e:
-        logging.error(f"解析来自控制应用的事件({{body}})错误, {e}")
+        logging.error(f"解析来自控制应用的事件({body})错误, {e}")
 
     # 2、查询数据中设备情况
     with app.app_context():
         try:
-            submit_task = db.session.query(Tasks).filter_by(id=task_id).first()
-            if not submit_task:
-                raise Exception("但未在数据库中查找到相应记录")
+            # 3、查找设备
+            device_obj = db.session.query(Device).filter_by(device_id=oper_device).first()
+            if not device_obj:
+                raise Exception(f"未查找到设备")
             
-            # 3、更新任务进度
-            submit_task.finish_time = get_current_time_with_ms()
-            if oper_status == "success":
-                submit_task.status = "success"
-            elif oper_status == "fail":
-                submit_task.status = "fail"
-                raise Exception(f"控制程序执行错误")
-            else:
-                raise Exception("事件的状态错误")
-            
-            # 4、根据任务类型，修改数据库中设备情况
-            if      submit_task.type == Task_Type.DEVICE_OPEN.value \
-                or  submit_task.type == Task_Type.DEVICE_CLOSE.value:
-                # 查询数据库中该设备
-                oper_device = db.session.query(Device).filter_by(device_id=submit_task.oper_device_id).first()
-                oper_device.device_status = '1' if oper_device.device_status == '0' else '0'
-            elif submit_task.type == Task_Type.DEVICE_WRITE.value:
+            # 4、查找任务
+            if task_type == Task_Type.DEVICE_READ.value:
+                add_task                    = Tasks()
+                add_task.type               = Task_Type.DEVICE_READ.value
+                add_task.oper_device_id     = oper_device
+                db.session.add(add_task)
+                db.session.commit()
+                task_id = add_task.id
+            task_obj = db.session.query(Tasks).filter_by(id=task_id).first()
+            if not task_obj:
+                raise Exception("未查找到任务")
+
+            # 根据任务类型进行处理
+            task_obj.status                 = oper_status
+            task_obj.finish_time            = get_current_time_with_ms()
+
+            if      task_type == Task_Type.DEVICE_OPEN.value       or \
+                    task_type == Task_Type.DEVICE_CLOSE.value :
+                device_obj.device_status = '1' if device_obj.device_status == '0' else '0'
+
+            elif    task_type == Task_Type.DEVICE_READ.value:
+                task_obj.oper_device_name = device_obj.device_name
+                # 设置操作的文件
+                pass
+
+            elif task_type == Task_Type.DEVICE_WRITE.value :
                 # 计算传输速率等
                 pass
-            else:
-                raise Exception("未实现的任务类型")
-    
+
         except Exception as e:
             logging.error(f"PIKA接收到控制应用的任务{task_id}出现错误，{e}")
         finally:
             db.session.commit()
 
 def pika_consumer(qu_name):
-    pika_channel.basic_consume(queue=qu_name, on_message_callback=cb, auto_ack=True)
-    pika_channel.start_consuming()
+    pika_channel_out.basic_consume(queue=qu_name, on_message_callback=cb, auto_ack=True)
+    pika_channel_out.start_consuming()
 
 # 监听pika
 th = threading.Thread(target=pika_consumer, args=(Config.RABBITMQ_QUEUENAME_OUT, ))
