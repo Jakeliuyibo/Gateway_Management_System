@@ -217,14 +217,14 @@
                                                 "columns": 
                                                 [
                                                     {"type": "text"   , "name": "id"                     ,"label": "${label_name[0]}" , "toggled": true,                                 },
-                                                    {"type": "text"   , "name": "priority"               ,"label": "${label_name[1]}" , "toggled": true,                                 },
+                                                    {"type": "text"   , "name": "priority"               ,"label": "${label_name[1]}" , "toggled": false,                                },
                                                     {"type": "text"   , "name": "type"                   ,"label": "${label_name[2]}" , "toggled": true,                                 },
                                                     {"type": "mapping", "name": "status"                 ,"label": "${label_name[3]}" , "toggled": true, "map": {"*": {"type": "status"}}},
                                                     {"type": "text"   , "name": "submit_user"            ,"label": "${label_name[4]}" , "toggled": false,},
                                                     {"type": "text"   , "name": "submit_time"            ,"label": "${label_name[5]}" , "toggled": false,},
                                                     {"type": "text"   , "name": "sched_time"             ,"label": "${label_name[6]}" , "toggled": false,},
                                                     {"type": "text"   , "name": "sched_finish_time"      ,"label": "${label_name[7]}" , "toggled": false,},
-                                                    {"type": "text"   , "name": "finish_time"            ,"label": "${label_name[8]}" , "toggled": false,},
+                                                    {"type": "text"   , "name": "finish_time"            ,"label": "${label_name[8]}" , "toggled": true,},
                                                     {"type": "text"   , "name": "oper_device_id"         ,"label": "${label_name[9]}" , "toggled": true,},
                                                     {"type": "text"   , "name": "oper_device_name"       ,"label": "${label_name[10]}", "toggled": true,},
                                                     {"type": "text"   , "name": "oper_file_id"           ,"label": "${label_name[11]}", "toggled": true,},
@@ -352,16 +352,45 @@
                                     {
                                         "type": "input-datetime-range",
                                         "name": "selectdaterange",
-                                        "value": "-10days",
+                                        "value": "-1days",
                                         "label": "日期范围",
                                         "timeFormat": "HH:mm:ss",
                                         "inputFormat": "YYYY-MM-DD HH:mm:ss",
+                                        "shortcuts": [
+                                            {
+                                                "label": "前1m",
+                                                "startDate": "${DATEMODIFY(NOW(), -1, 'minute')}",
+                                                "endDate": "${NOW()}"
+                                            },
+                                            {
+                                                "label": "前5m",
+                                                "startDate": "${DATEMODIFY(NOW(), -5, 'minute')}",
+                                                "endDate": "${NOW()}"
+                                            },
+                                            {
+                                                "label": "前10m",
+                                                "startDate": "${DATEMODIFY(NOW(), -10, 'minute')}",
+                                                "endDate": "${NOW()}"
+                                            },
+                                            {
+                                                "label": "前30m",
+                                                "startDate": "${DATEMODIFY(NOW(), -30, 'minute')}",
+                                                "endDate": "${NOW()}"
+                                            },
+                                            {
+                                                "label": "前1h",
+                                                "startDate": "${DATEMODIFY(NOW(), -1, 'hour')}",
+                                                "endDate": "${NOW()}"
+                                            },
+                                            "today",
+                                            "yesterday",
+                                        ]
                                     },
                                     {
                                         "label": "单位",
                                         "type": "select",
                                         "name": "selectunit",
-                                        "value": "MB",
+                                        "value": "KB",
                                         "options": ["B","KB","MB","GB"]
                                     },
                                     {
@@ -374,7 +403,7 @@
                                         "source": "get:/device/data_operation",
                                         "required": true,
                                         "size": "xl",
-                                        "value": "1",
+                                        "value": "5,6,7,8",
                                         "multiple": true,
                                         "pickerSchema": 
                                         {

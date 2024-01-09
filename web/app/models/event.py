@@ -23,3 +23,15 @@ def parse_device_event(event_str: str):
     status = event.get("status")
     other = event.get("other")
     return id, type, device, action, status, other
+
+def parse_device_event_other_info(other_str: str):
+    info = json.loads(other_str)
+    sched_time = info.get("sched_time")
+    sched_finish_time = info.get("sched_finish_time")
+    trans_bytes = info.get("trans_bytes")
+    recv_bytes = info.get("recv_bytes")
+    file_full_path = info.get("file_full_path")
+    file_path = info.get("file_path")
+    file_name = info.get("file_name")
+    file_size = info.get("file_size")
+    return sched_time, sched_finish_time, trans_bytes, recv_bytes, file_full_path, file_path, file_name, file_size

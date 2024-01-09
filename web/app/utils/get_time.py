@@ -91,14 +91,18 @@ def transfer_format_from_timestamp_to_datetime(time_stamp : int):
 
 '''
 description: 计算两个日期时间差值
-input  '%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M:%S', threshold(unit : miniutes)
-return {int} 相差的时间(unit: 秒)
+input  '%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M:%S'
+return {int/double} 相差的时间(unit: 秒)
 '''
 def cal_difftime_between_datetime(start_datetime, end_datetime):
     start_time  = datetime.datetime.strptime(start_datetime,"%Y-%m-%d %H:%M:%S")
     end_time    = datetime.datetime.strptime(end_datetime  ,"%Y-%m-%d %H:%M:%S")
     return (end_time - start_time).total_seconds()
 
+def cal_difftime_between_datetime_us(start_datetime, end_datetime):
+    start_time  = datetime.datetime.strptime(start_datetime,"%Y-%m-%d %H:%M:%S.%f")
+    end_time    = datetime.datetime.strptime(end_datetime  ,"%Y-%m-%d %H:%M:%S.%f")
+    return (end_time - start_time).total_seconds()
 
 """ 根据起始日期时间生成日期区间 """
 def generate_dateinterval_by_datetime(start_datetime, end_datetime, format):
@@ -109,7 +113,7 @@ def generate_dateinterval_by_datetime(start_datetime, end_datetime, format):
         it = datetime.timedelta(days=1)
     elif format == "H":
         ft = '%Y-%m-%d %H'
-        ft_brief = '%m-%d %H'
+        ft_brief = '%H时'
         it = datetime.timedelta(hours=1)
     elif format == "M":
         ft = '%Y-%m-%d %H:%M'
@@ -129,7 +133,8 @@ def generate_dateinterval_by_datetime(start_datetime, end_datetime, format):
     # 生成区间
     date_list = []
     date_brief_list = []
-    while st < et:
+    while st <= et:
+
         # 日期转字符串存入列表
         date_list.append(st.strftime(ft))
         date_brief_list.append(st.strftime(ft_brief))

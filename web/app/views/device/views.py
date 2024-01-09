@@ -421,7 +421,7 @@ def get_alldevices_taskinfo_for_chart1():
     selectunit, start_datetime, end_datetime, diff_datetime, size_divisior, selectdeviceid_list, selectdevicename_list, selectdevicedesc_list = dealargs_for_function_get_alldevices_taskinfo_for_chart()
     if selectdeviceid_list:
         # 初始化echarts图表
-        statistical_item_list = ['任务总数', '流量总数', '平均传输速率']
+        statistical_item_list = ['任务总数 (个)', f'流量总数 ({selectunit}ytes)', f'平均传输速率 ({selectunit}ytes/s)']
         ret_data = {
             "title": {"text": "设备-流量情况"},
             "tooltip":
@@ -429,7 +429,13 @@ def get_alldevices_taskinfo_for_chart1():
                 "trigger":"axis",
                 "axisPointer":{"type":"shadow"}
             },
-            "toolbox":{"show":"true","feature":{"saveAsImage":{}}},
+            "toolbox":{
+                "show":"true",
+                "feature":{
+                "saveAsImage":{
+                    "type":"svg",
+                }
+            }},
             "legend": {"data":[],},
             "xAxis":
             {
@@ -452,7 +458,8 @@ def get_alldevices_taskinfo_for_chart1():
         for idx, device_id in enumerate(selectdeviceid_list):
             try:
                 # 查询Tasks表对应设备的任务信息
-                db_obj = db.session.query(Tasks).filter_by(oper_device_id=device_id).filter(and_(Tasks.finish_time>start_datetime, 
+                db_obj = db.session.query(Tasks).filter_by(oper_device_id=device_id).filter(and_(Tasks.type==Task_Type.DEVICE_WRITE.value,
+                                                                                                 Tasks.finish_time>start_datetime, 
                                                                                                  Tasks.finish_time<end_datetime, 
                                                                                                  Tasks.status=="success"))
 
@@ -464,11 +471,12 @@ def get_alldevices_taskinfo_for_chart1():
             except Exception as e:
                 logging.error(f"渲染Chart1时查询设备{idx}的历史任务出错，错误原因{e}")
 
-            dataflow_count_list[idx] = round(dataflow_count_list[idx] / size_divisior, 2)
+            dataflow_count_list[idx] = round(dataflow_count_list[idx] / size_divisior, 3)
             if task_count_list[idx] > 0:
-                transfer_speed_list[idx] = round(transfer_speed_list[idx] / task_count_list[idx] / size_divisior, 2)
+                transfer_speed_list[idx] = round(transfer_speed_list[idx] / task_count_list[idx] / size_divisior, 3)
 
-            ret_data["series"].append({
+            ret_data["series"].append(
+                {
                     "name": selectdevicedesc_list[idx],
                     "type":"bar",
                     "data": [task_count_list[idx], dataflow_count_list[idx], transfer_speed_list[idx]],
@@ -499,7 +507,7 @@ def get_alldevices_taskinfo_for_chart2():
             "trigger":"axis",
             "axisPointer":{"type":"cross"}
         },
-        "toolbox":{"show":"true","feature":{"saveAsImage":{}}},
+        "toolbox":{"show":"true","feature":{"saveAsImage":{"type":"svg",}}},
         "legend": {"data":[],},
         "xAxis":
         {
@@ -509,7 +517,7 @@ def get_alldevices_taskinfo_for_chart2():
         "yAxis":
         {
             "type":"value",
-            "name":"数据流量/ " + selectunit,
+            "name":"数据流量 " + selectunit + "ytes/s",
             "axisLabel":{"formatter":"{value}"},
             "axisPointer":{"snap":"true"},
         },
@@ -522,39 +530,50 @@ def get_alldevices_taskinfo_for_chart2():
     elif diff_datetime > (60 * 60)    : # ! 时间差大于1小时
         ret_data["xAxis"]["name"] = "日期/ 小时"
         exp_format = "H"
-    elif diff_datetime > (60)         : # ! 时间差大于1分钟
+    elif diff_datetime > (8 * 60)     : # ! 时间差大于8分钟
         ret_data["xAxis"]["name"] = "日期/ 分钟"
         exp_format = "M"
-    else:                               # ! 时间差处于[0,60秒]
+    else:                               # ! 时间差处于[0,480秒]
         ret_data["xAxis"]["name"] = "日期/ 秒"
         exp_format = "S"
 
     selectdate_list, selectdate_brief_list = generate_dateinterval_by_datetime(start_datetime, end_datetime, exp_format)
+    # logging.critical(f"起始时间为{start_datetime}，截至时间为{end_datetime}，exp_format={exp_format},生成的列表为{selectdate_list}")
     ret_data["xAxis"]["data"] = selectdate_brief_list
 
     # 遍历选择的设备
     for idx, device_id in enumerate(selectdeviceid_list):
+        datacnt_list     = [0]   * len(selectdate_list)
         dataflow_list    = [0.0] * len(selectdate_list)
         try:
             # 查询Tasks表对应设备的任务信息
-            db_obj = db.session.query(Tasks).filter_by(oper_device_id=device_id).filter(and_(Tasks.finish_time>start_datetime, 
-                                                                                             Tasks.finish_time<end_datetime, 
+            db_obj = db.session.query(Tasks).filter_by(oper_device_id=device_id).filter(and_(Tasks.type==Task_Type.DEVICE_WRITE.value,
+                                                                                             Tasks.finish_time > start_datetime, 
+                                                                                             Tasks.finish_time < end_datetime, 
                                                                                              Tasks.status=="success"))
 
             tasks = db_obj.all()
             for task in tasks:
 
-                task_finish_date = transfer_format_from_datetime_with_ms_to_date(task.finish_time, exp_format)
+                task_finish_date        = transfer_format_from_datetime_with_ms_to_date(task.finish_time, exp_format)
                 if task_finish_date in selectdate_list:
-                    dataflow_list[selectdate_list.index(task_finish_date)] += round(float(task.oper_file_size) / size_divisior, 2)
+                    dataflow_list[selectdate_list.index(task_finish_date)] += float(task.transfer_rate)
+                    datacnt_list[selectdate_list.index(task_finish_date)]  += 1
+                else:
+                    logging.error(f"不在日期范围内{task_finish_date}")
+
+            for i, cnt in enumerate(datacnt_list):
+                if cnt != 0:
+                    dataflow_list[i] = round(dataflow_list[i] / size_divisior / cnt, 3)
 
             ret_data["legend"]["data"].append(selectdevicedesc_list[idx])
             ret_data["series"].append({
                     "name": selectdevicedesc_list[idx],
                     "type":"line",
-                    "smooth":"true",
+                    "smooth":False,
                     "data":dataflow_list,
-                    "markPoint": {"data": [{ "type": 'max', "name": 'Max' }]},
+                    "markPoint": {"data": [{"symbol":"pin","type": 'max', "name": 'Max', "label":{"color":"black"}}]},
+                    "markLine": {"data": [{ "type": 'average', "name": 'Avg' }]}
                 })
         except Exception as e:
             logging.error(f"渲染Chart2时查询设备{idx}的历史任务出错，错误原因{e}")
@@ -574,9 +593,11 @@ def cb(ch, method, properties, body):
     try:
         body = body.decode("utf-8").replace("\n", "").replace("\t", "")
         task_id, task_type, oper_device, oper_action, oper_status, other_info = parse_device_event(body)
+        sched_time, sched_finish_time, trans_bytes, recv_bytes, oper_file_full_path, oper_file_path, oper_file_name, oper_file_size = parse_device_event_other_info(other_info)
         logging.critical(f"PIKA读取到消息({body})")
     except Exception as e:
         logging.error(f"解析来自控制应用的事件({body})错误, {e}")
+        return
 
     # 2、查询数据中设备情况
     with app.app_context():
@@ -589,8 +610,12 @@ def cb(ch, method, properties, body):
             # 4、查找任务
             if task_type == Task_Type.DEVICE_READ.value:
                 add_task                    = Tasks()
+                add_task.priority           = 0
                 add_task.type               = Task_Type.DEVICE_READ.value
                 add_task.oper_device_id     = oper_device
+                add_task.oper_file_path     = oper_file_path
+                add_task.oper_file_name     = oper_file_name
+                add_task.oper_file_size     = oper_file_size
                 db.session.add(add_task)
                 db.session.commit()
                 task_id = add_task.id
@@ -600,6 +625,8 @@ def cb(ch, method, properties, body):
 
             # 根据任务类型进行处理
             task_obj.status                 = oper_status
+            task_obj.sched_time             = sched_time
+            task_obj.sched_finish_time      = sched_finish_time
             task_obj.finish_time            = get_current_time_with_ms()
 
             if      task_type == Task_Type.DEVICE_OPEN.value       or \
@@ -607,13 +634,14 @@ def cb(ch, method, properties, body):
                 device_obj.device_status = '1' if device_obj.device_status == '0' else '0'
 
             elif    task_type == Task_Type.DEVICE_READ.value:
+                task_obj.submit_time = task_obj.sched_time
                 task_obj.oper_device_name = device_obj.device_name
-                # 设置操作的文件
-                pass
-
-            elif task_type == Task_Type.DEVICE_WRITE.value :
-                # 计算传输速率等
-                pass
+            
+            if      task_type == Task_Type.DEVICE_READ.value       or \
+                    task_type == Task_Type.DEVICE_WRITE.value :
+                # 计算传输速率
+                task_obj.transfer_rate = round(float(oper_file_size) / cal_difftime_between_datetime_us(sched_time, sched_finish_time), 3)
+                logging.critical(f"task_obj.transfer_rate = {task_obj.transfer_rate} oper_file_size={oper_file_size}, cal_difftime_between_datetime_us(sched_time, sched_finish_time)={cal_difftime_between_datetime_us(sched_time, sched_finish_time)}")
 
         except Exception as e:
             logging.error(f"PIKA接收到控制应用的任务{task_id}出现错误，{e}")
